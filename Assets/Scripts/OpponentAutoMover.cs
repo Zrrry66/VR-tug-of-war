@@ -39,7 +39,7 @@ public class OpponentAutoMover : NetworkBehaviour
             yield return new WaitForSeconds(interval);
 
             Vector3 startPos = transform.position;
-            Vector3 endPos = startPos - transform.forward * moveDistance;
+            Vector3 endPos = startPos - transform.up * moveDistance;
 
             float elapsed = 0f;
             while (elapsed < moveDuration)
