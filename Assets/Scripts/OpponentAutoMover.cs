@@ -21,13 +21,6 @@ public class OpponentAutoMover : NetworkBehaviour
         {
             StartCoroutine(MoveRoutine());
         }
-
-        progressValue.OnValueChanged += OnProgressChanged;
-
-        if (IsClient && progressBar != null)
-        {
-            progressBar.fillAmount = progressValue.Value;
-        }
     }
 
     private IEnumerator MoveRoutine()
@@ -58,11 +51,5 @@ public class OpponentAutoMover : NetworkBehaviour
         }
     }
 
-    private void OnProgressChanged(float oldValue, float newValue)
-    {
-        if (IsClient && progressBar != null)
-        {
-            progressBar.fillAmount = newValue;
-        }
-    }
+   
 }
