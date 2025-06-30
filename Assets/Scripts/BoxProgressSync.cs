@@ -38,17 +38,21 @@ public class BoxProgressSync : NetworkBehaviour
             float newValue = progressValue.Value + (Time.deltaTime / 50.0f);
             UpdateProgressBar(newValue);
             progressValue.Value = newValue;
+            if (progressValue.Value >= 1) { progressValue.Value = 1.0f; }
         }
         else if (currentZ < previousZ)
         {
             Debug.Log("Moving Backward (negative Z)");
-            float newValue = progressValue.Value - (Time.deltaTime / (20.0f));
+            float newValue = progressValue.Value - (Time.deltaTime / 5.0f);
             UpdateProgressBar(newValue);
             progressValue.Value = newValue;
+            if (progressValue.Value <= 0) { progressValue.Value = 0.0f; }
         }
         
         previousZ = currentZ;
         Debug.Log("Progress Value" + progressValue.Value);
+        
+  
 
     }
 
