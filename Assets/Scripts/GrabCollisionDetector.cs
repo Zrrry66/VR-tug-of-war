@@ -1,6 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
-
+using UnityEngine.UI;
 public class GrabCollisionDetector : NetworkBehaviour
 {
 
@@ -8,12 +8,44 @@ public class GrabCollisionDetector : NetworkBehaviour
     private float lastTriggerTime = -1f;
     public float cooldown = 0.5f;
     public int flag = 0;
+    public int f2 = 0;
     public GameObject objectToMove;
     public float moveDistance = 2f;
 
+
+    private Vector3 initialPosition;
+    private Quaternion initialRotation;
+
+    public float progressIncreaseAmount = 0.03f;
+
+    [SerializeField] private Image progressBar;
+    private NetworkVariable<float> progressValue = new NetworkVariable<float>(
+       1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+
+
+
+
     void Start()
     {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        // rb.isKinematic = true; // Stops physics interactions (no jittering)
+        rb.constraints = RigidbodyConstraints.FreezePositionX
+               | RigidbodyConstraints.FreezePositionY
+               | RigidbodyConstraints.FreezePositionZ
+               | RigidbodyConstraints.FreezeRotationX
+               | RigidbodyConstraints.FreezeRotationY
+               | RigidbodyConstraints.FreezeRotationZ;
+      
+
         flag = 0;
+    }
+
+
+
+    public void OnGrab()
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        rb.constraints = RigidbodyConstraints.None;
     }
 
 
@@ -46,6 +78,10 @@ public class GrabCollisionDetector : NetworkBehaviour
             
                 Debug.Log("Moved object forward.");
             }
+
+            float newProgress = Mathf.Clamp01(progressValue.Value + progressIncreaseAmount);
+            progressValue.Value = newProgress;
+            progressBar.fillAmount = progressValue.Value;
         }
         else
         {
@@ -53,5 +89,11 @@ public class GrabCollisionDetector : NetworkBehaviour
         }
     }
 
-
+    private void OnProgressChanged(float oldValue, float newValue)
+    {
+        if (IsClient && progressBar != null)
+        {
+            progressBar.fillAmount = newValue;
+        }
+    }
 }
