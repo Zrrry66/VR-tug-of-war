@@ -3,17 +3,16 @@ using Unity.Netcode;
 using UnityEngine.InputSystem;
 using VRInSync.Network;
 
-
 public class NetworkedGameManager : NetworkBehaviour
 {
     public GameObject LobbyPanel;
     public GameObject InGamePanel;
     public GameObject PausePanel;
 
-    public BoxProgressSync progressSync;
+    public NetworkedProgressBar progressSync;
     public BoxAutoMover boxAutoMover;
-    public OpponentAutoMover opponentAutoMover;
-    public NetworkMusicManager musicManager;    // 拖入 NetworkMusicManager
+    public OpponentAutoMover[] opponentAutoMovers;
+    public NetworkMusicManager musicManager;
     public InputActionReference pauseAction;
 
     public enum GameState : byte { Lobby, Playing, Paused }
@@ -47,10 +46,22 @@ public class NetworkedGameManager : NetworkBehaviour
             TogglePauseServerRpc();
     }
 
-    // 客户端 Start 按钮调用
+    // Called by Start Button (inspector)
     public void StartGame()
     {
         StartGameServerRpc();
+    }
+
+    // Called by Resume Button (inspector)
+    public void ResumeGame()
+    {
+        TogglePauseServerRpc();
+    }
+
+    // Called by Restart Buttons (inspector)
+    public void RestartGame()
+    {
+        RestartGameServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -59,11 +70,12 @@ public class NetworkedGameManager : NetworkBehaviour
         netState.Value = GameState.Playing;
 
         // reset gameplay
-        //progressSync.ResetProgress();
+        progressSync.ResetProgress();
         boxAutoMover.EnableMovement();
-        opponentAutoMover.EnableMovement();
+        foreach (var mover in opponentAutoMovers)
+            mover.EnableMovement();
 
-        // 让音乐在全局同步后开始
+        // trigger global music
         musicManager.RequestStartMusicServerRpc();
     }
 
@@ -73,54 +85,50 @@ public class NetworkedGameManager : NetworkBehaviour
         if (netState.Value == GameState.Playing)
         {
             netState.Value = GameState.Paused;
-
-            // pause gameplay
             Time.timeScale = 0f;
             boxAutoMover.DisableMovement();
-            opponentAutoMover.DisableMovement();
-
-            // pause music on all clients
+            foreach (var mover in opponentAutoMovers)
+                mover.DisableMovement();
             musicManager.PauseMusicClientRpc();
         }
         else if (netState.Value == GameState.Paused)
         {
             netState.Value = GameState.Playing;
-
-            // resume gameplay
             Time.timeScale = 1f;
             boxAutoMover.EnableMovement();
-            opponentAutoMover.EnableMovement();
-
-            // resume music on all clients
+            foreach (var mover in opponentAutoMovers)
+                mover.EnableMovement();
             musicManager.ResumeMusicClientRpc();
         }
-    }
-
-    // 客户端 Restart 按钮调用
-    public void RestartGame()
-    {
-        RestartGameServerRpc();
     }
 
     [ServerRpc(RequireOwnership = false)]
     private void RestartGameServerRpc()
     {
         netState.Value = GameState.Playing;
+        
+        Time.timeScale = 1f;
 
-        // reset gameplay
-        //progressSync.ResetProgress();
+        boxAutoMover.ResetPosition();     // reset BoxAutoMover position
+        
+        foreach (var mover in opponentAutoMovers)
+        {
+            mover.ResetPosition();
+            mover.EnableMovement();
+        }
+
+        progressSync.ResetProgress();
         boxAutoMover.EnableMovement();
-        opponentAutoMover.EnableMovement();
 
-        // 重新调度全局音乐播放
+        // reschedule global music
+        musicManager.StopMusicClientRpc();
         musicManager.RequestStartMusicServerRpc();
     }
 
-    // 根据网络状态切面板
     private void UpdateUI(GameState state)
     {
         LobbyPanel.SetActive(state == GameState.Lobby);
-        InGamePanel.SetActive(state == GameState.Playing);
+        //InGamePanel.SetActive(state == GameState.Playing);
         PausePanel.SetActive(state == GameState.Paused);
     }
 }

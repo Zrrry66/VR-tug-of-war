@@ -12,6 +12,8 @@ public class OpponentAutoMover : NetworkBehaviour
 
     [SerializeField] private Image progressBar;
 
+    //store initial position
+    private Vector3 initialPosition; 
     private bool canMove = false;
 
     private NetworkVariable<float> progressValue = new NetworkVariable<float>(
@@ -19,6 +21,9 @@ public class OpponentAutoMover : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
+        // cache initial position on spawn
+        initialPosition = transform.position;
+
         if (IsServer)
         {
             StartCoroutine(MoveRoutine());
@@ -76,4 +81,10 @@ public class OpponentAutoMover : NetworkBehaviour
     // called by game manager
     public void EnableMovement() => canMove = true;
     public void DisableMovement() => canMove = false;
+
+    //reset to initial position
+    public void ResetPosition()
+    {
+        transform.position = initialPosition;
+    }
 }

@@ -7,12 +7,17 @@ public class BoxAutoMover : NetworkBehaviour
     public float interval = 3f; // time interval between moves
     public float moveDuration = 1f; // duration over which the movement is smoothed
 
+    //store initial position
+    private Vector3 initialPosition;
     private bool canMove = false;
 
     // Called when this NetworkBehaviour is spawned on the network.
     // Only run the movement coroutine on the server.
     public override void OnNetworkSpawn()
     {
+        // cache initial position on spawn
+        initialPosition = transform.position;
+
         if (IsServer)
         {
             StartCoroutine(MoveRoutine());
@@ -58,4 +63,10 @@ public class BoxAutoMover : NetworkBehaviour
     // called by GameManager
     public void EnableMovement() => canMove = true;
     public void DisableMovement() => canMove = false;
+
+    //reset to initial position
+    public void ResetPosition()
+    {
+        transform.position = initialPosition;
+    }
 }
