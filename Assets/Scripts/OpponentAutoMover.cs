@@ -61,12 +61,10 @@ public class OpponentAutoMover : NetworkBehaviour
 
             transform.position = endPos;
 
-            // Server-only progress change
-            float newProgress = Mathf.Clamp01(progressValue.Value - progressDecreaseAmount);
-            progressValue.Value = newProgress;
         }
     }
 
+   
     private void OnProgressChanged(float oldValue, float newValue)
     {
         if (IsClient && progressBar != null)

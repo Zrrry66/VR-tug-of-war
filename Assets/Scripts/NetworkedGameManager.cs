@@ -59,7 +59,7 @@ public class NetworkedGameManager : NetworkBehaviour
         netState.Value = GameState.Playing;
 
         // reset gameplay
-        progressSync.ResetProgress();
+        //progressSync.ResetProgress();
         boxAutoMover.EnableMovement();
         opponentAutoMover.EnableMovement();
 
@@ -108,7 +108,7 @@ public class NetworkedGameManager : NetworkBehaviour
         netState.Value = GameState.Playing;
 
         // reset gameplay
-        progressSync.ResetProgress();
+        //progressSync.ResetProgress();
         boxAutoMover.EnableMovement();
         opponentAutoMover.EnableMovement();
 

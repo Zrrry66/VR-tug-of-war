@@ -18,9 +18,6 @@ public class GrabCollisionDetector : NetworkBehaviour
 
     public float progressIncreaseAmount = 0.03f;
 
-    [SerializeField] private Image progressBar;
-    private NetworkVariable<float> progressValue = new NetworkVariable<float>(
-       1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
 
 
@@ -75,13 +72,9 @@ public class GrabCollisionDetector : NetworkBehaviour
                 // Move object backward along global Z axis (reduce Z position)
                 Vector3 backwardZ = new Vector3(0, 0, -moveDistance);
                 objectToMove.transform.position += backwardZ;
-            
                 Debug.Log("Moved object forward.");
             }
 
-            float newProgress = Mathf.Clamp01(progressValue.Value + progressIncreaseAmount);
-            progressValue.Value = newProgress;
-            progressBar.fillAmount = progressValue.Value;
         }
         else
         {
@@ -89,11 +82,4 @@ public class GrabCollisionDetector : NetworkBehaviour
         }
     }
 
-    private void OnProgressChanged(float oldValue, float newValue)
-    {
-        if (IsClient && progressBar != null)
-        {
-            progressBar.fillAmount = newValue;
-        }
-    }
 }
