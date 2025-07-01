@@ -10,23 +10,13 @@ public class OpponentAutoMover : NetworkBehaviour
     public float moveDuration = 1f;
     public float progressDecreaseAmount = 0.05f;
 
-    [SerializeField] private Image progressBar;
-
-    private NetworkVariable<float> progressValue = new NetworkVariable<float>(
-        1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+ 
 
     public override void OnNetworkSpawn()
     {
         if (IsServer)
         {
             StartCoroutine(MoveRoutine());
-        }
-
-        progressValue.OnValueChanged += OnProgressChanged;
-
-        if (IsClient && progressBar != null)
-        {
-            progressBar.fillAmount = progressValue.Value;
         }
     }
 
@@ -52,17 +42,8 @@ public class OpponentAutoMover : NetworkBehaviour
 
             transform.position = endPos;
 
-            // Server-only progress change
-            float newProgress = Mathf.Clamp01(progressValue.Value - progressDecreaseAmount);
-            progressValue.Value = newProgress;
         }
     }
 
-    private void OnProgressChanged(float oldValue, float newValue)
-    {
-        if (IsClient && progressBar != null)
-        {
-            progressBar.fillAmount = newValue;
-        }
-    }
+   
 }
