@@ -63,5 +63,21 @@ namespace VRInSync.Network
 
             Debug.Log($"[Everyone] playback scheduled at DSP time = {scheduledDsp:F3}");
         }
+        
+        // Pause music on all clients
+        [ClientRpc]
+        public void PauseMusicClientRpc()
+        {
+            if (audioSource.isPlaying)
+                audioSource.Pause();
+        }
+
+        // Resume (unpause) music on all clients
+        [ClientRpc]
+        public void ResumeMusicClientRpc()
+        {
+            if (!audioSource.isPlaying)
+                audioSource.UnPause();
+        }
     }
 }

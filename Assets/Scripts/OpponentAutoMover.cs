@@ -12,6 +12,8 @@ public class OpponentAutoMover : NetworkBehaviour
 
     [SerializeField] private Image progressBar;
 
+    private bool canMove = false;
+
     private NetworkVariable<float> progressValue = new NetworkVariable<float>(
         1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -34,11 +36,18 @@ public class OpponentAutoMover : NetworkBehaviour
     {
         while (true)
         {
+            //wait until gamemanager enables movement
+            yield return new WaitUntil(() => canMove);
+
             yield return new WaitForSeconds(interval);
+
+            // double check in case paused mid-wait
+            if (!canMove)
+                continue;
 
             Vector3 startPos = transform.position;
 
-            // ✅ Move along the GLOBAL -Z axis (backward)
+            // Move along the GLOBAL -Z axis (backward)
             Vector3 endPos = startPos + Vector3.forward * moveDistance;
 
             float elapsed = 0f;
@@ -65,4 +74,8 @@ public class OpponentAutoMover : NetworkBehaviour
             progressBar.fillAmount = newValue;
         }
     }
+
+    // called by game manager
+    public void EnableMovement() => canMove = true;
+    public void DisableMovement() => canMove = false;
 }
