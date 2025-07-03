@@ -92,6 +92,17 @@ public class NetworkedProgressBar : NetworkBehaviour
         normalizedProgress.Value = 0.5f;
     }
 
+    [ClientRpc]
+    public void ClearEndStateClientRpc()
+    {
+        // hide end UI and clear the flag
+        gameEnded = false;
+        messageText.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(false);
+        Time.timeScale = 1f;
+    }
+
+
     /// <summary>
     /// Public call to reset progress and UI state
     /// </summary>
@@ -100,14 +111,13 @@ public class NetworkedProgressBar : NetworkBehaviour
         ResetProgressServerRpc();
 
         // Only owner resets local UI state
-        if (IsOwner)
-        {
+        //if (IsOwner)
+        //{
             gameEnded = false;
             messageText.gameObject.SetActive(false);
             restartButton.gameObject.SetActive(false);
-
             Time.timeScale = 1f;
-        }
+        //}
     }
 
     /// <summary>

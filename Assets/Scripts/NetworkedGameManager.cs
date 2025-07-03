@@ -2,11 +2,12 @@
 using Unity.Netcode;
 using UnityEngine.InputSystem;
 using VRInSync.Network;
+using UnityEngine.SceneManagement;
 
 public class NetworkedGameManager : NetworkBehaviour
 {
     public GameObject LobbyPanel;
-    public GameObject InGamePanel;
+    //public GameObject InGamePanel;
     public GameObject PausePanel;
 
     public NetworkedProgressBar progressSync;
@@ -14,6 +15,7 @@ public class NetworkedGameManager : NetworkBehaviour
     public OpponentAutoMover[] opponentAutoMovers;
     public NetworkMusicManager musicManager;
     public InputActionReference pauseAction;
+
 
     public enum GameState : byte { Lobby, Playing, Paused }
     private NetworkVariable<GameState> netState =
@@ -64,6 +66,15 @@ public class NetworkedGameManager : NetworkBehaviour
         RestartGameServerRpc();
     }
 
+    // Bind to button OnClick
+    public void OnRestartButtonPressed()
+    {
+        progressSync.ClearEndStateClientRpc();
+        progressSync.ResetProgress();             
+        RestartGameServerRpc();
+    }
+
+
     [ServerRpc(RequireOwnership = false)]
     private void StartGameServerRpc()
     {
@@ -102,23 +113,33 @@ public class NetworkedGameManager : NetworkBehaviour
         }
     }
 
+    //Reload scene: will go back to create lobby panel
+    [ClientRpc]
+    private void ReloadSceneClientRpc()
+    {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     [ServerRpc(RequireOwnership = false)]
     private void RestartGameServerRpc()
     {
+        //ReloadSceneClientRpc();
+
         netState.Value = GameState.Playing;
         
         Time.timeScale = 1f;
-
-        boxAutoMover.ResetPosition();     // reset BoxAutoMover position
         
         foreach (var mover in opponentAutoMovers)
         {
             mover.ResetPosition();
             mover.EnableMovement();
         }
+        
+        //progressSync.ClearEndStateClientRpc();
+        //progressSync.ResetProgress();
 
-        progressSync.ResetProgress();
         boxAutoMover.EnableMovement();
+        
 
         // reschedule global music
         musicManager.StopMusicClientRpc();
