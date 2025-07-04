@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro; 
 using Unity.Netcode;
 using UnityEngine.SceneManagement;
+using VRInSync.Network;
 
 public class NetworkedProgressBar : NetworkBehaviour
 {
@@ -21,6 +22,8 @@ public class NetworkedProgressBar : NetworkBehaviour
 
     [SerializeField]
     private Button restartButton;      // Reference to the Restart Button
+
+    public NetworkMusicManager musicManager;
 
     [Header("Progress Settings")]
     [SerializeField]
@@ -131,6 +134,7 @@ public class NetworkedProgressBar : NetworkBehaviour
         restartButton.gameObject.SetActive(true); // Show restart button
         Time.timeScale = 0f;                    // Pause game locally
         gameEnded = true;                       // Prevent further updates
+        musicManager.StopMusicClientRpc();
     }
 }
 /*using Unity.Netcode;
