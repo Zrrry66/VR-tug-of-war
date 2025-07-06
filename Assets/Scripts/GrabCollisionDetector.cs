@@ -1,50 +1,43 @@
 using UnityEngine;
 using Unity.Netcode;
-using UnityEngine.UI;
+
 public class GrabCollisionDetector : NetworkBehaviour
 {
-
-
     private float lastTriggerTime = -1f;
     public float cooldown = 0.5f;
+
     public int flag = 0;
     public int f2 = 0;
-    public GameObject objectToMove;
-    public float moveDistance = 2f;
 
+    public GameObject objectToMove; // This should be a NetworkObject in the scene
+    public float moveDistance = 2f;
 
     private Vector3 initialPosition;
     private Quaternion initialRotation;
 
     public float progressIncreaseAmount = 0.03f;
 
-
-
+    public GameObject msgQueue;
 
 
     void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
-        // rb.isKinematic = true; // Stops physics interactions (no jittering)
         rb.constraints = RigidbodyConstraints.FreezePositionX
-               | RigidbodyConstraints.FreezePositionY
-               | RigidbodyConstraints.FreezePositionZ
-               | RigidbodyConstraints.FreezeRotationX
-               | RigidbodyConstraints.FreezeRotationY
-               | RigidbodyConstraints.FreezeRotationZ;
-      
+                       | RigidbodyConstraints.FreezePositionY
+                       | RigidbodyConstraints.FreezePositionZ
+                       | RigidbodyConstraints.FreezeRotationX
+                       | RigidbodyConstraints.FreezeRotationY
+                       | RigidbodyConstraints.FreezeRotationZ;
 
         flag = 0;
     }
-
-
 
     public void OnGrab()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.None;
     }
-
 
     private void OnTriggerEnter(Collider other)
     {
@@ -58,23 +51,19 @@ public class GrabCollisionDetector : NetworkBehaviour
 
         if (other.CompareTag("Point1") && flag == 0)
         {
-            Debug.Log("Detect collision with point  Enter 1");
+            Debug.Log("Detect collision with Point1");
             flag = 1;
         }
-        else if (other.CompareTag("Point2") && flag ==1)
+        else if (other.CompareTag("Point2") && flag == 1)
         {
-            Debug.Log("Detect collision with point Enter 2");
+            Debug.Log("Detect collision with Point2");
             flag = 0;
-            // move a object to forwar to user
+
             if (objectToMove != null)
             {
-           
-                // Move object backward along global Z axis (reduce Z position)
-                Vector3 backwardZ = new Vector3(0, 0, -moveDistance);
-                objectToMove.transform.position += backwardZ;
-                Debug.Log("Moved object forward.");
+                Debug.Log("Calling MoveObjectServerRpc");
+                MoveObjectServerRpc();
             }
-
         }
         else
         {
@@ -82,4 +71,18 @@ public class GrabCollisionDetector : NetworkBehaviour
         }
     }
 
+    [ServerRpc]
+    void MoveObjectServerRpc()
+    {
+        if (objectToMove != null)
+        {
+            Vector3 backwardZ = new Vector3(0, 0, -moveDistance);
+          //  objectToMove.transform.position += backwardZ;
+
+            Debug.Log("Moved object on the server. New position: " + objectToMove.transform.position);
+            string objName = gameObject.name;
+            msgQueue.GetComponent<SyncroniCalculator>().SubmitGrabMessageServerRpc(objName);
+            Debug.Log("Pulled Object name: " + objName);
+        }
+    }
 }
