@@ -6,6 +6,7 @@ public class SyncroniCalculator : NetworkBehaviour
 {
     private Queue<string> msgQueue = new Queue<string>();
     public GameObject targetObject;  // Assign via Inspector
+    public float moveDistance = 2f;
 
     private void Start()
     {
@@ -55,8 +56,10 @@ public class SyncroniCalculator : NetworkBehaviour
         if (targetObject != null)
         {
             Vector3 oldPos = targetObject.transform.position;
-            targetObject.transform.position += targetObject.transform.forward * 1f;
+            Vector3 backwardZ = new Vector3(0, 0, -moveDistance);
+            targetObject.transform.position += backwardZ;
             Vector3 newPos = targetObject.transform.position;
+
 
             Debug.Log($"[Server] Moved targetObject forward from {oldPos} to {newPos}");
         }
