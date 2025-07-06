@@ -70,9 +70,8 @@ public class NetworkedGameManager : NetworkBehaviour
     public void OnRestartButtonPressed()
     {
         Debug.Log("Restart button is pressed.");
-        RestartGameServerRpc();
-        progressSync.ClearEndStateClientRpc();
-        progressSync.ResetProgress();             
+        progressSync.ResetProgress();
+        RestartGameServerRpc();          
     }
 
 
@@ -136,7 +135,7 @@ public class NetworkedGameManager : NetworkBehaviour
             mover.EnableMovement();
         }
         
-        //progressSync.ClearEndStateClientRpc();
+        progressSync.ClearEndStateClientRpc();
         //progressSync.ResetProgress();
 
         boxAutoMover.EnableMovement();

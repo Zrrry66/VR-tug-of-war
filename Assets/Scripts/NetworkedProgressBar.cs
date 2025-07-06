@@ -103,6 +103,7 @@ public class NetworkedProgressBar : NetworkBehaviour
         messageText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         Time.timeScale = 1f;
+        box.position = midpoint.position;
     }
 
 
