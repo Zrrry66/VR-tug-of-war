@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Point1
   - Point2
+  - Canvas
   layers:
   - Default
   - TransparentFX

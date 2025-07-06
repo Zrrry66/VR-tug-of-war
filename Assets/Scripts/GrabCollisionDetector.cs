@@ -17,6 +17,9 @@ public class GrabCollisionDetector : NetworkBehaviour
 
     public float progressIncreaseAmount = 0.03f;
 
+    public GameObject msgQueue;
+
+
     void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -77,6 +80,9 @@ public class GrabCollisionDetector : NetworkBehaviour
             objectToMove.transform.position += backwardZ;
 
             Debug.Log("Moved object on the server. New position: " + objectToMove.transform.position);
+            string objName = gameObject.name;
+            msgQueue.GetComponent<SyncroniCalculator>().SubmitGrabMessageServerRpc(objName);
+            Debug.Log("Pulled Object name: " + objName);
         }
     }
 }
