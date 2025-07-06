@@ -69,9 +69,10 @@ public class NetworkedGameManager : NetworkBehaviour
     // Bind to button OnClick
     public void OnRestartButtonPressed()
     {
+        Debug.Log("Restart button is pressed.");
+        RestartGameServerRpc();
         progressSync.ClearEndStateClientRpc();
         progressSync.ResetProgress();             
-        RestartGameServerRpc();
     }
 
 

@@ -119,7 +119,7 @@ public class NetworkedProgressBar : NetworkBehaviour
             gameEnded = false;
             messageText.gameObject.SetActive(false);
             restartButton.gameObject.SetActive(false);
-            Time.timeScale = 1f;
+            //Time.timeScale = 1f;
         //}
     }
 
