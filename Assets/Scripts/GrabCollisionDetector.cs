@@ -77,7 +77,7 @@ public class GrabCollisionDetector : NetworkBehaviour
         if (objectToMove != null)
         {
             Vector3 backwardZ = new Vector3(0, 0, -moveDistance);
-            objectToMove.transform.position += backwardZ;
+          //  objectToMove.transform.position += backwardZ;
 
             Debug.Log("Moved object on the server. New position: " + objectToMove.transform.position);
             string objName = gameObject.name;
