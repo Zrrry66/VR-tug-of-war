@@ -7,6 +7,8 @@ TagManager:
   - Point1
   - Point2
   - Canvas
+  - SpawnPoint
+  - StartButton
   layers:
   - Default
   - TransparentFX
