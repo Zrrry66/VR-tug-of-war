@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections;
 
 public class GrabCollisionDetector : NetworkBehaviour
 {
@@ -9,7 +10,7 @@ public class GrabCollisionDetector : NetworkBehaviour
     public int flag = 0;
     public int f2 = 0;
 
-    public GameObject objectToMove; // This should be a NetworkObject in the scene
+    public GameObject objectToMove;
     public float moveDistance = 2f;
 
     private Vector3 initialPosition;
@@ -19,6 +20,8 @@ public class GrabCollisionDetector : NetworkBehaviour
 
     public GameObject msgQueue;
 
+    private GameObject firstPoint;               // reference to the first-touched sphere
+    private Coroutine firstTimeoutCoroutine;     // coroutine for first-touch timeout
 
     void Start()
     {
@@ -53,17 +56,37 @@ public class GrabCollisionDetector : NetworkBehaviour
         {
             Debug.Log("Detect collision with Point1");
             flag = 1;
+            
+            // Start first-touch feedback:
+            firstPoint = other.gameObject;
+            SetColor(firstPoint, Color.green);// Sphere1 turns green
+            // Cancel any previous timeout
+            if (firstTimeoutCoroutine != null)
+                StopCoroutine(firstTimeoutCoroutine);
+            // Start timeout: if no Point2 within 3s, reset Sphere1
+            firstTimeoutCoroutine = StartCoroutine(ResetFirstAfterTimeout());
         }
         else if (other.CompareTag("Point2") && flag == 1)
         {
             Debug.Log("Detect collision with Point2");
             flag = 0;
+            
+            // Second-touch feedback:
+            GameObject secondPoint = other.gameObject;
+            SetColor(secondPoint, Color.green);// Sphere2 turns green
+
+            // Cancel first-touch timeout
+            if (firstTimeoutCoroutine != null)
+                StopCoroutine(firstTimeoutCoroutine);
 
             if (objectToMove != null)
             {
                 Debug.Log("Calling MoveObjectServerRpc");
                 MoveObjectServerRpc();
             }
+            
+            // Reset colors after 1 second
+            StartCoroutine(ResetBothAfterDelay(secondPoint));
         }
         else
         {
@@ -84,5 +107,38 @@ public class GrabCollisionDetector : NetworkBehaviour
             msgQueue.GetComponent<SyncroniCalculator>().SubmitGrabMessageServerRpc(objName);
             Debug.Log("Pulled Object name: " + objName);
         }
+    }
+ 
+    private IEnumerator ResetFirstAfterTimeout()
+    {
+        yield return new WaitForSeconds(3f);
+        if (firstPoint != null)
+            SetColor(firstPoint, Color.white);// reset to white
+        firstPoint = null;
+        firstTimeoutCoroutine = null;
+        flag = 0;
+    }
+
+    // Reset colors after 1 second
+    private IEnumerator ResetBothAfterDelay(GameObject secondPoint)
+    {
+        yield return new WaitForSeconds(1f);
+        if (firstPoint != null)
+            SetColor(firstPoint, Color.white);
+        if (secondPoint != null)
+            SetColor(secondPoint, Color.white);
+        firstPoint = null;
+    }
+
+    /// <summary>
+    /// Helper to set the color of a sphere's Renderer.
+    /// </summary>
+    /// <param name="obj">Sphere GameObject</param>
+    /// <param name="col">Target Color</param>
+    private void SetColor(GameObject obj, Color col)
+    {
+        Renderer rend = obj.GetComponent<Renderer>();
+        if (rend != null)
+            rend.material.color = col;
     }
 }
