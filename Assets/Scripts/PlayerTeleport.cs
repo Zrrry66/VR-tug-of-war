@@ -45,12 +45,13 @@ public class PlayerTeleport : NetworkBehaviour
     private void OnStartClicked()
     {
         // Client-side: request server to teleport all players
-        TeleportAllServerRpc();
+         TeleportAllServerRpc();
     }
 
     [ServerRpc]
     private void TeleportAllServerRpc(ServerRpcParams rpcParams = default)
     {
+
         // On server: loop through all connected clients
         foreach (var clientInfo in NetworkManager.Singleton.ConnectedClientsList)
         {

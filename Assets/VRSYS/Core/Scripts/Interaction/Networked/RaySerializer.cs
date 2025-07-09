@@ -166,6 +166,9 @@ namespace VRSYS.Core.Interaction
 
         private void ApplyRayUpdates()
         {
+
+         
+
             ray.enabled = rayData.Value.enabled;
             if (ray.enabled)
             {
