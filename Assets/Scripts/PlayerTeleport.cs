@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Unity.Netcode;
 using System.Linq;
+using VRSYS.Core.Networking;
 
 public class PlayerTeleport : NetworkBehaviour
 {
@@ -45,13 +46,25 @@ public class PlayerTeleport : NetworkBehaviour
     private void OnStartClicked()
     {
         // Client-side: request server to teleport all players
-         TeleportAllServerRpc();
+        TeleportAllRpc();
     }
 
-    [ServerRpc]
-    private void TeleportAllServerRpc(ServerRpcParams rpcParams = default)
+    [Rpc(SendTo.Everyone, RequireOwnership = false)]
+    private void TeleportAllRpc()
     {
+        NetworkUser[] networkUsers = FindObjectsByType<NetworkUser>(FindObjectsSortMode.None);
+        var orderedNetworkUsers = networkUsers.OrderBy(user => user.userName.Value);
 
+        for(int i = 0; i < networkUsers.Length; ++i)
+        {
+            if(networkUsers[i].userName == NetworkUser.LocalInstance.userName)
+            {
+                NetworkUser.LocalInstance.transform.position = spawnPoints[i].position;
+            }
+        }
+
+
+        return;
         // On server: loop through all connected clients
         foreach (var clientInfo in NetworkManager.Singleton.ConnectedClientsList)
         {
