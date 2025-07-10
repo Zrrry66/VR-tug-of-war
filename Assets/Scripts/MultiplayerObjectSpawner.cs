@@ -9,12 +9,12 @@ public class MultiplayerObjectSpawner : NetworkBehaviour
     public float row2OffsetX = 4f;
     public float verticalSpacing = 2f;
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        Invoke(nameof(SpawnCrowd), 3.0f);
+        //SpawnCrowd();
     }
 
-    void SpawnCrowd()
+    public void SpawnCrowd()
     {
         SpawnRow(-row2OffsetX, "Row 2 Left");
         SpawnRow(-row1OffsetX, "Row 1 Left");
@@ -24,7 +24,7 @@ public class MultiplayerObjectSpawner : NetworkBehaviour
 
     void SpawnRow(float offsetX, string rowName)
     {
-        if (!IsServer)
+        if (!IsServer || !IsHost)
             return;
 
         for (int i = 0; i < objectsPerRow; i++)
