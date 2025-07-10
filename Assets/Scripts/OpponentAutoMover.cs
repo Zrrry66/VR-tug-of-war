@@ -16,6 +16,11 @@ public class OpponentAutoMover : NetworkBehaviour
     private Vector3 initialPosition; 
     private bool canMove = false;
 
+    float elapsed = -1f;
+    Vector3 startPos;
+    // Move along the GLOBAL -Z axis (backward)
+    Vector3 endPos;
+
     private NetworkVariable<float> progressValue = new NetworkVariable<float>(
         1f, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
@@ -26,7 +31,7 @@ public class OpponentAutoMover : NetworkBehaviour
 
         if (IsServer)
         {
-            StartCoroutine(MoveRoutine());
+            //StartCoroutine(MoveRoutine());
         }
 
         progressValue.OnValueChanged += OnProgressChanged;
@@ -37,35 +42,31 @@ public class OpponentAutoMover : NetworkBehaviour
         }
     }
 
-    private IEnumerator MoveRoutine()
+    public void Update()
     {
-        while (true)
+        if (!IsServer)
+            return;
+
+        if (!canMove)
+            return;
+
+        if (elapsed < 0)
         {
-            //wait until gamemanager enables movement
-            yield return new WaitUntil(() => canMove);
-
-            yield return new WaitForSeconds(interval);
-
-            // double check in case paused mid-wait
-            if (!canMove)
-                continue;
-
-            Vector3 startPos = transform.position;
-
+            startPos = transform.position;
             // Move along the GLOBAL -Z axis (backward)
-            Vector3 endPos = startPos + Vector3.forward * moveDistance;
+            endPos = startPos + Vector3.forward * moveDistance;
+            elapsed = 0.0f;
+        }
 
-            float elapsed = 0f;
-            while (elapsed < moveDuration)
-            {
-                float t = elapsed / moveDuration;
-                transform.position = Vector3.Lerp(startPos, endPos, t);
-                elapsed += Time.deltaTime;
-                yield return null;
-            }
-
-            transform.position = endPos;
-
+        if (elapsed < moveDuration)
+        {
+            Debug.Log("Moving opponent.");
+            float t = elapsed / moveDuration;
+            transform.position = Vector3.Lerp(startPos, endPos, t);
+            elapsed += Time.deltaTime;
+        } else
+        {
+            elapsed = -1;
         }
     }
 
