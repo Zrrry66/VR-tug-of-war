@@ -7,13 +7,27 @@ namespace VRInSync.Network
 {
     public class NetworkMusicManager : NetworkBehaviour
     {
-        public AudioSource audioSource;
+        public AudioSource goAudioSource;      // Plays "321Go"
+        public AudioSource mainAudioSource;    // Plays "MainLoop"
+        public AudioSource cheerAudioSource;  //for cheering
         private double networkToDspOffset;
 
         private void Awake()
         {
-            if (audioSource == null)
-                audioSource = GetComponentInChildren<AudioSource>();
+            if (goAudioSource == null || mainAudioSource == null)
+            {
+                var sources = GetComponentsInChildren<AudioSource>();
+                if (sources.Length >= 2)
+                {
+                    goAudioSource = sources[0];
+                    mainAudioSource = sources[1];
+                    cheerAudioSource = sources[2];
+                }
+                else
+                {
+                    Debug.LogError("Not enough AudioSources assigned or found in children.");
+                }
+            }
         }
 
         private void Start()
@@ -30,27 +44,23 @@ namespace VRInSync.Network
             Debug.Log($"[Client] NTP→DSP offset = {networkToDspOffset:F3}s");
         }
 
-        // This RPC runs on the server when a client requests playback
         [Rpc(SendTo.Server)]
         public void RequestStartMusicServerRpc()
         {
             if (!IsServer) return;
 
-            // get a fresh NTP time, add buffer, send ticks to all clients
             var nowUtc = NtpTime.GetNetworkTime();
-            var startUtc = nowUtc.AddSeconds(5);
+            var startUtc = nowUtc.AddSeconds(1);  // buffer for sync
             long ticks = startUtc.Ticks;
 
             StartMusicClientRpc(ticks);
-            Debug.Log($"[Server] scheduled global start time: {startUtc:O}");
+            Debug.Log($"[Server] Scheduled global start time: {startUtc:O}");
         }
 
-        // This RPC runs on every instance (server and clients)
         [Rpc(SendTo.Everyone)]
         private void StartMusicClientRpc(long startTimeTicks)
         {
-            // resync offset for best accuracy
-            SyncOffset();
+           SyncOffset();
 
             var startUtc = new DateTime(startTimeTicks, DateTimeKind.Utc);
             double startSec = (startUtc - DateTime.UnixEpoch).TotalSeconds;
@@ -58,31 +68,41 @@ namespace VRInSync.Network
             double delay = (startSec - networkToDspOffset) - dspNow;
             if (delay < 0) delay = 0;
 
-            double scheduledDsp = dspNow + delay;
-            audioSource.PlayScheduled(scheduledDsp);
+            // Scheduled DSP times
+            double dsp321GoTime = dspNow + delay;
+            double goClipLength = goAudioSource.clip.length;
+            double dspMainLoopTime = dsp321GoTime + goClipLength;
 
-            Debug.Log($"[Everyone] playback scheduled at DSP time = {scheduledDsp:F3}");
+            // Schedule all
+            goAudioSource.PlayScheduled(dsp321GoTime);
+            mainAudioSource.PlayScheduled(dspMainLoopTime);
+            cheerAudioSource.PlayScheduled(dspMainLoopTime);
+
+            Debug.Log($"[Everyone] '321Go' at DSP={dsp321GoTime:F3}, 'MainLoop' and 'Cheer' at DSP={dspMainLoopTime:F3}");
         }
 
-        //stop music
         [Rpc(SendTo.Everyone)]
         public void StopMusicClientRpc()
         {
-            audioSource.Stop();
+            goAudioSource.Stop();
+            mainAudioSource.Stop();
+            cheerAudioSource.Stop();
         }
 
-        // pause
         [Rpc(SendTo.Everyone)]
         public void PauseMusicClientRpc()
         {
-            audioSource.Pause();
+            goAudioSource.Pause();
+            mainAudioSource.Pause();
+            cheerAudioSource.Pause();
         }
 
-        //resume
         [Rpc(SendTo.Everyone)]
         public void ResumeMusicClientRpc()
         {
-            audioSource.UnPause();
+            goAudioSource.UnPause();
+            mainAudioSource.UnPause();
+            cheerAudioSource.UnPause();
         }
     }
 }
