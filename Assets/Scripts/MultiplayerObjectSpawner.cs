@@ -11,6 +11,11 @@ public class MultiplayerObjectSpawner : NetworkBehaviour
 
     void Start()
     {
+        Invoke(nameof(SpawnCrowd), 3.0f);
+    }
+
+    void SpawnCrowd()
+    {
         SpawnRow(-row2OffsetX, "Row 2 Left");
         SpawnRow(-row1OffsetX, "Row 1 Left");
         SpawnRow(row1OffsetX, "Row 1 Right");
@@ -19,6 +24,9 @@ public class MultiplayerObjectSpawner : NetworkBehaviour
 
     void SpawnRow(float offsetX, string rowName)
     {
+        if (!IsServer)
+            return;
+
         for (int i = 0; i < objectsPerRow; i++)
         {
             Vector3 spawnPos = transform.position + new Vector3(offsetX, 0, (i - objectsPerRow / 2f) * verticalSpacing);
@@ -32,7 +40,9 @@ public class MultiplayerObjectSpawner : NetworkBehaviour
             {
                 obj = Instantiate(prefabToSpawn, spawnPos, Quaternion.Euler(0, 90, 0));
             }
-           obj.name = $"{rowName}_Obj_{i}";
+            obj.name = $"{rowName}_Obj_{i}";
+            var instanceNetworkObject = obj.GetComponent<NetworkObject>();
+            instanceNetworkObject.Spawn();
         }
     }
 }
