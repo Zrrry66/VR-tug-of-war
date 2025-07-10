@@ -86,6 +86,7 @@ public class OpponentAutoMover : NetworkBehaviour
     //reset to initial position
     public void ResetPosition()
     {
+        Debug.Log("Resetting auto mover position to: " + initialPosition);
         transform.position = initialPosition;
     }
 }

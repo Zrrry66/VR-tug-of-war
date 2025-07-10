@@ -22,6 +22,8 @@ public class NetworkedProgressBar : NetworkBehaviour
 
     [SerializeField]
     private Button restartButton;      // Reference to the Restart Button
+    [SerializeField] 
+    private Button reloadButton;
 
     public NetworkMusicManager musicManager;
 
@@ -102,8 +104,9 @@ public class NetworkedProgressBar : NetworkBehaviour
         gameEnded = false;
         messageText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
+        reloadButton.gameObject.SetActive(false);
         Time.timeScale = 1f;
-        box.position = midpoint.position;
+        //box.position = midpoint.position;
     }
 
 
@@ -120,6 +123,7 @@ public class NetworkedProgressBar : NetworkBehaviour
             gameEnded = false;
             messageText.gameObject.SetActive(false);
             restartButton.gameObject.SetActive(false);
+            reloadButton.gameObject.SetActive(false);
             //Time.timeScale = 1f;
         //}
     }
@@ -133,6 +137,7 @@ public class NetworkedProgressBar : NetworkBehaviour
         messageText.gameObject.SetActive(true); // Make text visible
         messageText.text = msg;                 // Set content
         restartButton.gameObject.SetActive(true); // Show restart button
+        //reloadButton.gameObject.SetActive(true);
         Time.timeScale = 0f;                    // Pause game locally
         gameEnded = true;                       // Prevent further updates
         musicManager.StopMusicClientRpc();

@@ -3,6 +3,7 @@ using Unity.Netcode;
 using UnityEngine.InputSystem;
 using VRInSync.Network;
 using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class NetworkedGameManager : NetworkBehaviour
 {
@@ -66,9 +67,15 @@ public class NetworkedGameManager : NetworkBehaviour
         RestartGameServerRpc();
     }
 
+    public void ReloadScene()
+    {
+        ReloadSceneRpc();
+    }
+
     // Bind to button OnClick
     public void OnRestartButtonPressed()
     {
+        //DisablePhysicsRpc();
         Debug.Log("Restart button is pressed.");
         progressSync.ResetProgress();
         RestartGameServerRpc();          
@@ -82,12 +89,47 @@ public class NetworkedGameManager : NetworkBehaviour
 
         // reset gameplay
         progressSync.ResetProgress();
-        boxAutoMover.EnableMovement();
-        foreach (var mover in opponentAutoMovers)
-            mover.EnableMovement();
 
+        // start movers after a 3-second delay
+        StartCoroutine(DelayedEnableMovers());
         // trigger global music
         musicManager.RequestStartMusicServerRpc();
+    }
+
+    // Coroutine: wait 3 seconds, then enable both movers on the server
+    private IEnumerator DelayedEnableMovers()
+    {
+        // wait for 3 seconds before enabling movement
+        yield return new WaitForSeconds(3f);
+
+        // enable box mover
+        boxAutoMover.EnableMovement();
+
+        // enable all opponent movers
+        foreach (var mover in opponentAutoMovers)
+            mover.EnableMovement();
+    }
+
+    [Rpc(SendTo.Everyone, RequireOwnership = true)]
+    private void DisablePhysicsRpc()
+    {
+        // TODO: remeber the original state of the rigidBody before disabling
+        var rigBodys = FindObjectsByType<Rigidbody>(sortMode:FindObjectsSortMode.None);
+        foreach(var rigBody in rigBodys)
+        {
+            rigBody.isKinematic = true;
+        }
+    }
+
+    [Rpc(SendTo.Everyone, RequireOwnership = true)]
+    private void EnablePhysicsRpc()
+    {
+        // TODO: apply the original state of the rigidBody again
+        var rigBodys = FindObjectsByType<Rigidbody>(sortMode: FindObjectsSortMode.None);
+        foreach (var rigBody in rigBodys)
+        {
+            rigBody.isKinematic = false;
+        }
     }
 
     [ServerRpc(RequireOwnership = false)]
@@ -114,8 +156,8 @@ public class NetworkedGameManager : NetworkBehaviour
     }
 
     //Reload scene: will go back to create lobby panel
-    [ClientRpc]
-    private void ReloadSceneClientRpc()
+    [Rpc(SendTo.Everyone)]
+    private void ReloadSceneRpc()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -139,7 +181,8 @@ public class NetworkedGameManager : NetworkBehaviour
         //progressSync.ResetProgress();
 
         boxAutoMover.EnableMovement();
-        
+
+        //EnablePhysicsRpc();
 
         // reschedule global music
         musicManager.StopMusicClientRpc();

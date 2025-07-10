@@ -25,25 +25,25 @@ public class PlayerTeleport : NetworkBehaviour
         // 2. Only the owning client sets up the UI listener
         if (!IsOwner) return;
 
-        GameObject btnObj = GameObject.FindWithTag(startButtonTag);
-        if (btnObj == null)
-        {
-            Debug.LogError("StartButton not found! Make sure it's tagged 'StartButton'.");
-            return;
-        }
-
-        startButton = btnObj.GetComponent<Button>();
-        if (startButton == null)
-        {
-            Debug.LogError("StartButton GameObject has no Button component!");
-            return;
-        }
-
-        // Register click listener
-        startButton.onClick.AddListener(OnStartClicked);
+        //GameObject btnObj = GameObject.FindWithTag(startButtonTag);
+        //if (btnObj == null)
+        //{
+        //    Debug.LogError("StartButton not found! Make sure it's tagged 'StartButton'.");
+        //    return;
+        //}
+        //
+        //startButton = btnObj.GetComponent<Button>();
+        //if (startButton == null)
+        //{
+        //    Debug.LogError("StartButton GameObject has no Button component!");
+        //    return;
+        //}
+        //
+        //// Register click listener
+        //startButton.onClick.AddListener(OnStartClicked);
     }
 
-    private void OnStartClicked()
+    public void OnStartClicked()
     {
         // Client-side: request server to teleport all players
         TeleportAllRpc();
