@@ -50,7 +50,7 @@ public class PlayerTeleport : NetworkBehaviour
     }
 
     [Rpc(SendTo.Everyone, RequireOwnership = false)]
-    private void TeleportAllRpc()
+    /*private void TeleportAllRpc()
     {
         NetworkUser[] networkUsers = FindObjectsByType<NetworkUser>(FindObjectsSortMode.None);
         var orderedNetworkUsers = networkUsers.OrderBy(user => user.userName.Value);
@@ -83,4 +83,17 @@ public class PlayerTeleport : NetworkBehaviour
             playerObj.transform.position = spawnPoints[idx].position;
         }
     }
+    */
+    private void TeleportAllRpc()
+   {
+       // teleport each user
+       var users = FindObjectsByType<NetworkUser>(FindObjectsSortMode.None)
+                       .OrderBy(u => u.userName.Value)
+                       .ToArray();
+
+      for (int i = 0; i<users.Length; ++i)
+       {
+           users[i].transform.position = spawnPoints[i % spawnPoints.Length].position;
+      }
+   }
 }
