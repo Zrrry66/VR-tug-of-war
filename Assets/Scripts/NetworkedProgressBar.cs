@@ -76,9 +76,9 @@ public class NetworkedProgressBar : NetworkBehaviour
         {
             float fill = normalizedProgress.Value;
             if (fill <= 0f)
-                ShowEndMessage("You Lost!");
+                ShowEndMessageRpc("You Lost!");
             else if (fill >= 1f)
-                ShowEndMessage("You Win!");
+                ShowEndMessageRpc("You Win!");
         }
     }
 
@@ -132,7 +132,8 @@ public class NetworkedProgressBar : NetworkBehaviour
     /// Display win/lose message and pause the local game
     /// </summary>
     /// <param name="msg">The message to display</param>
-    private void ShowEndMessage(string msg)
+    [Rpc(SendTo.Everyone, RequireOwnership = true)]
+    private void ShowEndMessageRpc(string msg)
     {
         messageText.gameObject.SetActive(true); // Make text visible
         messageText.text = msg;                 // Set content
@@ -140,7 +141,8 @@ public class NetworkedProgressBar : NetworkBehaviour
         //reloadButton.gameObject.SetActive(true);
         Time.timeScale = 0f;                    // Pause game locally
         gameEnded = true;                       // Prevent further updates
-        musicManager.StopMusicClientRpc();
+        if(IsOwner)
+            musicManager.StopMusicClientRpc();
     }
 }
 /*using Unity.Netcode;
