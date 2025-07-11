@@ -9,7 +9,7 @@ namespace VRInSync.Network
     {
         public AudioSource goAudioSource;      // Plays "321Go"
         public AudioSource mainAudioSource;    // Plays "MainLoop"
-        public AudioSource cheerAudioSource;  //for cheering
+        public AudioSource cheerAudioSource;    // "Cheering"
         private double networkToDspOffset;
 
         private void Awake()
@@ -50,7 +50,7 @@ namespace VRInSync.Network
             if (!IsServer) return;
 
             var nowUtc = NtpTime.GetNetworkTime();
-            var startUtc = nowUtc.AddSeconds(1);  // buffer for sync
+            var startUtc = nowUtc.AddSeconds(0.5);  // buffer for sync
             long ticks = startUtc.Ticks;
 
             StartMusicClientRpc(ticks);
@@ -60,7 +60,7 @@ namespace VRInSync.Network
         [Rpc(SendTo.Everyone)]
         private void StartMusicClientRpc(long startTimeTicks)
         {
-           SyncOffset();
+            SyncOffset();
 
             var startUtc = new DateTime(startTimeTicks, DateTimeKind.Utc);
             double startSec = (startUtc - DateTime.UnixEpoch).TotalSeconds;
@@ -100,9 +100,9 @@ namespace VRInSync.Network
         [Rpc(SendTo.Everyone)]
         public void ResumeMusicClientRpc()
         {
-            goAudioSource.UnPause();
-            mainAudioSource.UnPause();
-            cheerAudioSource.UnPause();
+             goAudioSource.UnPause();
+             mainAudioSource.UnPause();
+             cheerAudioSource.UnPause();
         }
     }
 }
