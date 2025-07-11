@@ -25,32 +25,32 @@ public class PlayerTeleport : NetworkBehaviour
         // 2. Only the owning client sets up the UI listener
         if (!IsOwner) return;
 
-        GameObject btnObj = GameObject.FindWithTag(startButtonTag);
-        if (btnObj == null)
-        {
-            Debug.LogError("StartButton not found! Make sure it's tagged 'StartButton'.");
-            return;
-        }
-
-        startButton = btnObj.GetComponent<Button>();
-        if (startButton == null)
-        {
-            Debug.LogError("StartButton GameObject has no Button component!");
-            return;
-        }
-
-        // Register click listener
-        startButton.onClick.AddListener(OnStartClicked);
+        //GameObject btnObj = GameObject.FindWithTag(startButtonTag);
+        //if (btnObj == null)
+        //{
+        //    Debug.LogError("StartButton not found! Make sure it's tagged 'StartButton'.");
+        //    return;
+        //}
+        //
+        //startButton = btnObj.GetComponent<Button>();
+        //if (startButton == null)
+        //{
+        //    Debug.LogError("StartButton GameObject has no Button component!");
+        //    return;
+        //}
+        //
+        //// Register click listener
+        //startButton.onClick.AddListener(OnStartClicked);
     }
 
-    private void OnStartClicked()
+    public void OnStartClicked()
     {
         // Client-side: request server to teleport all players
         TeleportAllRpc();
     }
 
     [Rpc(SendTo.Everyone, RequireOwnership = false)]
-    private void TeleportAllRpc()
+    /*private void TeleportAllRpc()
     {
         NetworkUser[] networkUsers = FindObjectsByType<NetworkUser>(FindObjectsSortMode.None);
         var orderedNetworkUsers = networkUsers.OrderBy(user => user.userName.Value);
@@ -83,4 +83,17 @@ public class PlayerTeleport : NetworkBehaviour
             playerObj.transform.position = spawnPoints[idx].position;
         }
     }
+    */
+    private void TeleportAllRpc()
+   {
+       // teleport each user
+       var users = FindObjectsByType<NetworkUser>(FindObjectsSortMode.None)
+                       .OrderBy(u => u.userName.Value)
+                       .ToArray();
+
+      for (int i = 0; i<users.Length; ++i)
+       {
+           users[i].transform.position = spawnPoints[i % spawnPoints.Length].position;
+      }
+   }
 }

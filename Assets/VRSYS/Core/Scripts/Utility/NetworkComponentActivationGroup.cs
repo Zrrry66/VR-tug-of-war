@@ -190,7 +190,8 @@ namespace VRSYS.Core.Utility
                 return;
             }
     
-            activeGroupIndex.Value = index;
+            if(IsOwner)
+                activeGroupIndex.Value = index;
             
             UpdateEnabledStates();
         }

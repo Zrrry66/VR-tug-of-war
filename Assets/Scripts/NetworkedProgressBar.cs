@@ -22,6 +22,8 @@ public class NetworkedProgressBar : NetworkBehaviour
 
     [SerializeField]
     private Button restartButton;      // Reference to the Restart Button
+    [SerializeField] 
+    private Button reloadButton;
 
     public NetworkMusicManager musicManager;
 
@@ -74,9 +76,9 @@ public class NetworkedProgressBar : NetworkBehaviour
         {
             float fill = normalizedProgress.Value;
             if (fill <= 0f)
-                ShowEndMessage("You Lost!");
+                ShowEndMessageRpc("You Lost!");
             else if (fill >= 1f)
-                ShowEndMessage("You Win!");
+                ShowEndMessageRpc("You Win!");
         }
     }
 
@@ -102,8 +104,9 @@ public class NetworkedProgressBar : NetworkBehaviour
         gameEnded = false;
         messageText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
+        reloadButton.gameObject.SetActive(false);
         Time.timeScale = 1f;
-        box.position = midpoint.position;
+        //box.position = midpoint.position;
     }
 
 
@@ -120,6 +123,7 @@ public class NetworkedProgressBar : NetworkBehaviour
             gameEnded = false;
             messageText.gameObject.SetActive(false);
             restartButton.gameObject.SetActive(false);
+            reloadButton.gameObject.SetActive(false);
             //Time.timeScale = 1f;
         //}
     }
@@ -128,14 +132,17 @@ public class NetworkedProgressBar : NetworkBehaviour
     /// Display win/lose message and pause the local game
     /// </summary>
     /// <param name="msg">The message to display</param>
-    private void ShowEndMessage(string msg)
+    [Rpc(SendTo.Everyone, RequireOwnership = true)]
+    private void ShowEndMessageRpc(string msg)
     {
         messageText.gameObject.SetActive(true); // Make text visible
         messageText.text = msg;                 // Set content
         restartButton.gameObject.SetActive(true); // Show restart button
+        //reloadButton.gameObject.SetActive(true);
         Time.timeScale = 0f;                    // Pause game locally
         gameEnded = true;                       // Prevent further updates
-        musicManager.StopMusicClientRpc();
+        if(IsOwner)
+            musicManager.StopMusicClientRpc();
     }
 }
 /*using Unity.Netcode;

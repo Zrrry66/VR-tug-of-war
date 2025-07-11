@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
+using UnityEngine.XR;
 
 public class GrabCollisionDetector : NetworkBehaviour
 {
@@ -22,6 +23,10 @@ public class GrabCollisionDetector : NetworkBehaviour
 
     private GameObject firstPoint;               // reference to the first-touched sphere
     private Coroutine firstTimeoutCoroutine;     // coroutine for first-touch timeout
+
+    // Haptic device
+    private InputDevice rightHandDevice;
+    private bool hapticInitialized = false;
 
     void Start()
     {
@@ -63,6 +68,7 @@ public class GrabCollisionDetector : NetworkBehaviour
             // Cancel any previous timeout
             if (firstTimeoutCoroutine != null)
                 StopCoroutine(firstTimeoutCoroutine);
+
             // Start timeout: if no Point2 within 3s, reset Sphere1
             firstTimeoutCoroutine = StartCoroutine(ResetFirstAfterTimeout());
         }
@@ -78,6 +84,9 @@ public class GrabCollisionDetector : NetworkBehaviour
             // Cancel first-touch timeout
             if (firstTimeoutCoroutine != null)
                 StopCoroutine(firstTimeoutCoroutine);
+
+            // Trigger haptic vibration on controller
+            StartCoroutine(Vibrate(0.4f, 0.2f)); // 50% amplitude for 0.2s
 
             if (objectToMove != null)
             {
@@ -140,5 +149,48 @@ public class GrabCollisionDetector : NetworkBehaviour
         Renderer rend = obj.GetComponent<Renderer>();
         if (rend != null)
             rend.material.color = col;
+    }
+    /// <summary>
+    /// Initialize the right-hand haptic device.
+    /// </summary>
+    private void InitializeHapticDevice()
+    {
+        // Populate a list with devices at the RightHand node
+        var devices = new System.Collections.Generic.List<InputDevice>();
+        InputDevices.GetDevicesAtXRNode(XRNode.RightHand, devices);
+        if (devices.Count > 0)
+        {
+            rightHandDevice = devices[0];
+            hapticInitialized = true;
+        }
+    }
+
+    /// <summary>
+    /// Coroutine to vibrate the controller.
+    /// </summary>
+    /// <param name="amplitude">Haptic strength [0.0,1.0]</param>
+    /// <param name="duration">Duration in seconds</param>
+    private IEnumerator Vibrate(float amplitude, float duration)
+    {
+        if (!hapticInitialized)
+            InitializeHapticDevice();
+
+        if (rightHandDevice.isValid)
+        {
+            HapticCapabilities capabilities;
+            // Check if device supports impulse
+            if (rightHandDevice.TryGetHapticCapabilities(out capabilities) && capabilities.supportsImpulse)
+            {
+                uint channel = 0;
+                // Send the haptic impulse
+                rightHandDevice.SendHapticImpulse(channel, amplitude, duration);
+            }
+        }
+
+        // Wait for the vibration duration
+        yield return new WaitForSeconds(duration);
+
+        // Stop any ongoing haptics
+        rightHandDevice.StopHaptics();
     }
 }
