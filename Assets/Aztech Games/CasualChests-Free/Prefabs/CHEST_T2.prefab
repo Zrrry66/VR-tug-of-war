@@ -111,7 +111,7 @@ GameObject:
   - component: {fileID: 292744352865582098}
   - component: {fileID: 1491570921550552498}
   - component: {fileID: 4327211856542650046}
-  - component: {fileID: 5031872712394897303}
+  - component: {fileID: 1790148445418106302}
   m_Layer: 0
   m_Name: CHEST_T2
   m_TagString: Untagged
@@ -222,7 +222,7 @@ Rigidbody:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6090436556579561852}
   serializedVersion: 4
-  m_Mass: 1
+  m_Mass: 2
   m_Drag: 0
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
@@ -253,8 +253,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1990985531
-  InScenePlacedSourceGlobalObjectIdHash: 0
+  GlobalObjectIdHash: 3550880032
+  InScenePlacedSourceGlobalObjectIdHash: 1647094807
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -359,7 +359,7 @@ MonoBehaviour:
   filter: -65535
   m_SourceCollider: {fileID: 1887712251522338096}
   m_DistanceField: {fileID: 0}
---- !u!114 &5031872712394897303
+--- !u!114 &1790148445418106302
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
