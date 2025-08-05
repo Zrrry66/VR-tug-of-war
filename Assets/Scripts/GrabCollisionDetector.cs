@@ -5,7 +5,7 @@ using UnityEngine.XR;
 
 public class GrabCollisionDetector : NetworkBehaviour
 {
-    private float lastTriggerTime = -1f;
+    //private float lastTriggerTime = -1f;
     public float cooldown = 0.5f;
 
     public int flag = 0;
@@ -28,6 +28,11 @@ public class GrabCollisionDetector : NetworkBehaviour
     private InputDevice rightHandDevice;
     private bool hapticInitialized = false;
 
+    //beat detector
+    public BeatDetector beatDetector;
+    public float beatVibrationAmplitude = 0.2f;
+    public float beatVibrationDuration = 0.1f;
+
     void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -39,9 +44,25 @@ public class GrabCollisionDetector : NetworkBehaviour
                        | RigidbodyConstraints.FreezeRotationZ;
 
         flag = 0;
+
+        if (beatDetector != null)
+            beatDetector.OnBeatDetected.AddListener(HandleBeatDetected);
+
     }
 
-    public void OnGrab()
+    void OnDisable()
+   {
+        if (beatDetector != null)
+            beatDetector.OnBeatDetected.RemoveListener(HandleBeatDetected);
+    }
+
+   // when detected whistle, call vibration
+   public void HandleBeatDetected()
+   {
+    StartCoroutine(Vibrate(beatVibrationAmplitude, beatVibrationDuration));
+   }
+
+public void OnGrab()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.None;
@@ -86,7 +107,7 @@ public class GrabCollisionDetector : NetworkBehaviour
                 StopCoroutine(firstTimeoutCoroutine);
 
             // Trigger haptic vibration on controller
-            StartCoroutine(Vibrate(0.4f, 0.2f)); // 50% amplitude for 0.2s
+            StartCoroutine(Vibrate(0.4f, 0.2f)); // 40% amplitude for 0.2s
 
             if (objectToMove != null)
             {

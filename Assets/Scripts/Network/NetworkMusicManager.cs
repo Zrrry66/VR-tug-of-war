@@ -10,6 +10,7 @@ namespace VRInSync.Network
         public AudioSource audioSource;
         public AudioSource audioSource2;
         public AudioSource audioSource3;
+        public AudioSource audioSource4; // whistle only
 
         private double networkToDspOffset;
 
@@ -52,7 +53,6 @@ namespace VRInSync.Network
             Debug.Log($"[Server] scheduled global start time: {startUtc:O}");
         }
 
-        // This RPC runs on every instance (server and clients)
         [Rpc(SendTo.Everyone)]
         private void StartMusicClientRpc(long startTimeTicks)
         {
@@ -83,8 +83,10 @@ namespace VRInSync.Network
             // Play audio 2 and 3 simultaneously
             audioSource2.loop = true;
             audioSource3.loop = true;
+            audioSource4.loop = true;
             audioSource2.PlayScheduled(dspTimeFor23);
             audioSource3.PlayScheduled(dspTimeFor23);
+            audioSource4.PlayScheduled(dspTimeFor23);
 
             Debug.Log($"[Everyone] Audio1 scheduled at DSP time = {dspStartTime:F3}");
             Debug.Log($"[Everyone] Audio2/3 scheduled at DSP time = {dspTimeFor23:F3}");
@@ -98,6 +100,7 @@ namespace VRInSync.Network
             audioSource.Stop();
             audioSource2.Stop();
             audioSource3.Stop();
+            audioSource4.Stop();
         }
 
         // pause
@@ -107,6 +110,7 @@ namespace VRInSync.Network
             audioSource.Pause();
             audioSource2.Pause();
             audioSource3.Pause();
+            audioSource4.Pause();
         }
 
         //resume
@@ -116,6 +120,7 @@ namespace VRInSync.Network
             audioSource.UnPause();
             audioSource2.UnPause();
             audioSource3.UnPause();
+            audioSource4.UnPause();
         }
     }
 }
