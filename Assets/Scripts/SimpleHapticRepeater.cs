@@ -1,48 +1,62 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using Unity.Netcode;   // Built-in Unity Netcode
+using System.Collections;
+using System.Collections.Generic;
 
-public class SimpleHapticRepeater : MonoBehaviour
+public class SimpleHapticRepeater : NetworkBehaviour
 {
-    [Range(0f, 1f)]
-    public float amplitude = 0.5f;
-    public float duration = 0.2f;
-    public float interval = 1f;
+    [Range(0f, 1f)] public float amplitude = 0.2f;
+    public float duration = 3.5f;
+    public float interval = 5f;
 
     private Coroutine hapticCoroutine;
 
-    void Start()
+    public override void OnNetworkSpawn()
     {
-        hapticCoroutine = StartCoroutine(HapticLoop());
+        if (IsServer)  // only server runs the loop
+        {
+            hapticCoroutine = StartCoroutine(ServerLoop());
+        }
     }
 
-    private IEnumerator HapticLoop()
+    private IEnumerator ServerLoop()
     {
         while (true)
         {
             yield return new WaitForSeconds(interval);
+            TriggerHapticsClientRpc(amplitude, duration);
+        }
+    }
 
-            // Get all right-hand devices
-            var devices = new List<InputDevice>();
-            InputDevices.GetDevicesAtXRNode(XRNode.RightHand, devices);
+    [ClientRpc] // runs on each client
+    private void TriggerHapticsClientRpc(float amp, float dur)
+    {
+        // Locally vibrate this client’s controller
+        VibrateLocalDevice(amp, dur);
+    }
 
-            foreach (var device in devices)
+    private void VibrateLocalDevice(float amp, float dur)
+    {
+        var devices = new List<InputDevice>();
+        InputDevices.GetDevicesAtXRNode(XRNode.RightHand, devices);
+
+        foreach (var device in devices)
+        {
+            if (device.isValid &&
+                device.TryGetHapticCapabilities(out var caps) &&
+                caps.supportsImpulse)
             {
-                if (device.isValid &&
-                    device.TryGetHapticCapabilities(out var capabilities) &&
-                    capabilities.supportsImpulse)
-                {
-                    device.SendHapticImpulse(0, amplitude, duration);
-                    Debug.Log($"[HAPTIC] Vibrated device: {device.name}");
-                }
+                device.SendHapticImpulse(0, Mathf.Clamp01(amp), dur);
             }
         }
     }
 
     private void OnDisable()
     {
-        if (hapticCoroutine != null)
+        if (IsServer && hapticCoroutine != null)
+        {
             StopCoroutine(hapticCoroutine);
+        }
     }
 }
