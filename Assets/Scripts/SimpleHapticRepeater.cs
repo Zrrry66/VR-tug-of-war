@@ -9,7 +9,7 @@ public class SimpleHapticRepeater : NetworkBehaviour
     [Range(0f, 1f)] public float amplitude = 0.2f;
     public float duration = 3.5f;
     public float interval = 5f;
-
+    public bool isHaptic = false;
     private Coroutine hapticCoroutine;
 
     public override void OnNetworkSpawn()
@@ -33,6 +33,7 @@ public class SimpleHapticRepeater : NetworkBehaviour
     private void TriggerHapticsClientRpc(float amp, float dur)
     {
         // Locally vibrate this client’s controller
+        if(!isHaptic){return;}
         VibrateLocalDevice(amp, dur);
     }
 
