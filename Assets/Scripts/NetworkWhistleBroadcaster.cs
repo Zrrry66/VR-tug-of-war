@@ -5,8 +5,10 @@ using System.Collections;
 public class NetworkWhistleBroadcaster : NetworkBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float interval = 500f;     // how often to repeat (seconds)
-    [SerializeField] private float staggerDelay = 20f; // delay between players
+    [SerializeField] private float interval = 5f;     // how often to repeat (seconds)
+    [SerializeField] private float staggerDelay = 2f; // delay between clients
+    [Header("Toggle Broadcasting")]
+    [SerializeField] private bool isBroadcasting = true; // enable/disable from Inspector
 
     private AudioSource audioSource;
     private Coroutine whistleLoop;
@@ -31,7 +33,11 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     {
         while (true)
         {
-            BroadcastWhistle();
+            if (isBroadcasting) // only broadcast if enabled
+            {
+                BroadcastWhistle();
+            }
+
             yield return new WaitForSeconds(interval);
         }
     }
@@ -47,7 +53,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
             var client = clients[i];
             float delay = i * staggerDelay;
 
-            // Tell this client to play whistle
+            // Send RPC to this client
             ClientRpcParams rpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -58,7 +64,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
 
             PlayWhistleClientRpc(delay, rpcParams);
 
-            // If this client is also the host, play whistle locally
+            // If this client is also the host, play locally
             if (client.ClientId == NetworkManager.Singleton.LocalClientId)
             {
                 StartCoroutine(PlayWithDelay(delay));
