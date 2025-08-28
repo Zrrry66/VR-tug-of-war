@@ -9,7 +9,7 @@ public class WhistleSound : MonoBehaviour
         audioSource = GetComponent<AudioSource>();
 
         // Call PlayWhistle every 1 second, starting immediately
-        InvokeRepeating("PlayWhistle", 0f, 1f);
+        InvokeRepeating("PlayWhistle", 0f, 30f);
     }
 
     void PlayWhistle()

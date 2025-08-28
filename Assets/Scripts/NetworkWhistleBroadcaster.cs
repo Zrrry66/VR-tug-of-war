@@ -5,8 +5,8 @@ using System.Collections;
 public class NetworkWhistleBroadcaster : NetworkBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float interval = 5f;     // how often to repeat (seconds)
-    [SerializeField] private float staggerDelay = 2f; // delay between players
+    [SerializeField] private float interval = 500f;     // how often to repeat (seconds)
+    [SerializeField] private float staggerDelay = 20f; // delay between players
 
     private AudioSource audioSource;
     private Coroutine whistleLoop;
