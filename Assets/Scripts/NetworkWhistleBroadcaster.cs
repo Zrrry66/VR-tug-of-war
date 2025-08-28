@@ -4,16 +4,16 @@ using System.Collections;
 
 public class NetworkWhistleBroadcaster : NetworkBehaviour
 {
-    [Header("Audio Settings")]
-    [SerializeField] private AudioClip whistleClip;   // assign in Inspector
-    [SerializeField] private float interval = 5f;     // repeat interval (seconds)
-    [SerializeField] private float staggerDelay = 2f; // delay between clients
+    [Header("Settings")]
+    [SerializeField] private float interval = 5f;     // how often to repeat (seconds)
+    [SerializeField] private float staggerDelay = 2f; // delay between players
 
     private AudioSource audioSource;
     private Coroutine whistleLoop;
 
     private void Awake()
     {
+        // Get or add AudioSource
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -47,7 +47,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
             var client = clients[i];
             float delay = i * staggerDelay;
 
-            // Send RPC to each client (including host)
+            // Tell this client to play whistle
             ClientRpcParams rpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -58,7 +58,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
 
             PlayWhistleClientRpc(delay, rpcParams);
 
-            // If this client is also the host (server + client), play locally as well
+            // If this client is also the host, play whistle locally
             if (client.ClientId == NetworkManager.Singleton.LocalClientId)
             {
                 StartCoroutine(PlayWithDelay(delay));
@@ -76,14 +76,14 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        if (whistleClip != null)
+        if (audioSource.clip != null)
         {
-            audioSource.PlayOneShot(whistleClip);
+            audioSource.Play();
             Debug.Log($"Whistle played after {delay}s delay on client {NetworkManager.Singleton.LocalClientId}");
         }
         else
         {
-            Debug.LogWarning("Whistle clip not assigned!");
+            Debug.LogWarning("No AudioClip assigned on AudioSource!");
         }
     }
 
