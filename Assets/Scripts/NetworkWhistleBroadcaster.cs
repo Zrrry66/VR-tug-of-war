@@ -5,17 +5,25 @@ using System.Collections;
 public class NetworkWhistleBroadcaster : NetworkBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float interval = 5f;     // how often to repeat (seconds)
+    [SerializeField] private float interval = 5f;     // repeat interval in seconds
     [SerializeField] private float staggerDelay = 2f; // delay between clients
-    [Header("Toggle Broadcasting")]
-    [SerializeField] private bool isBroadcasting = true; // enable/disable from Inspector
+
+    [Header("Inspector Control")]
+    [SerializeField] private bool broadcastingDefault = true; // toggle from Inspector
 
     private AudioSource audioSource;
     private Coroutine whistleLoop;
+    private bool lastInspectorValue;
+
+    // Networked toggle for broadcasting
+    public NetworkVariable<bool> isBroadcasting = new NetworkVariable<bool>(
+        true,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
     private void Awake()
     {
-        // Get or add AudioSource
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -25,7 +33,23 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     {
         if (IsServer)
         {
+            // Initialize NetworkVariable from Inspector
+            isBroadcasting.Value = broadcastingDefault;
+            lastInspectorValue = broadcastingDefault;
+
             whistleLoop = StartCoroutine(WhistleLoop());
+        }
+    }
+
+    private void Update()
+    {
+        if (!IsServer) return;
+
+        // Detect Inspector changes at runtime
+        if (broadcastingDefault != lastInspectorValue)
+        {
+            isBroadcasting.Value = broadcastingDefault;
+            lastInspectorValue = broadcastingDefault;
         }
     }
 
@@ -33,10 +57,8 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     {
         while (true)
         {
-            if (isBroadcasting) // only broadcast if enabled
-            {
+            if (isBroadcasting.Value)
                 BroadcastWhistle();
-            }
 
             yield return new WaitForSeconds(interval);
         }
@@ -75,6 +97,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     [ClientRpc]
     private void PlayWhistleClientRpc(float delay, ClientRpcParams rpcParams = default)
     {
+        if (!isBroadcasting.Value) return; // respect server toggle
         StartCoroutine(PlayWithDelay(delay));
     }
 
