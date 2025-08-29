@@ -5,7 +5,7 @@ using System.Collections;
 public class NetworkWhistleBroadcaster : NetworkBehaviour
 {
     [Header("Settings")]
-    [SerializeField] private float interval = 5f;     // repeat interval in seconds
+    [SerializeField] private float interval = 5f;     // time between whistle rounds
     [SerializeField] private float staggerDelay = 2f; // delay between clients
 
     [Header("Inspector Control")]
@@ -15,7 +15,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     private Coroutine whistleLoop;
     private bool lastInspectorValue;
 
-    // Networked toggle for broadcasting
+    // Networked toggle for broadcasting (server-controlled)
     public NetworkVariable<bool> isBroadcasting = new NetworkVariable<bool>(
         true,
         NetworkVariableReadPermission.Everyone,
@@ -24,6 +24,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
 
     private void Awake()
     {
+        // Get or add AudioSource
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -45,10 +46,10 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     {
         if (!IsServer) return;
 
-        // Detect Inspector changes at runtime
+        // Detect runtime Inspector changes
         if (broadcastingDefault != lastInspectorValue)
         {
-            isBroadcasting.Value = broadcastingDefault;
+            isBroadcasting.Value = broadcastingDefault; // sync to all clients
             lastInspectorValue = broadcastingDefault;
         }
     }
@@ -58,7 +59,9 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
         while (true)
         {
             if (isBroadcasting.Value)
+            {
                 BroadcastWhistle();
+            }
 
             yield return new WaitForSeconds(interval);
         }
@@ -75,7 +78,7 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
             var client = clients[i];
             float delay = i * staggerDelay;
 
-            // Send RPC to this client
+            // Send RPC to each client
             ClientRpcParams rpcParams = new ClientRpcParams
             {
                 Send = new ClientRpcSendParams
@@ -105,14 +108,24 @@ public class NetworkWhistleBroadcaster : NetworkBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        if (audioSource.clip != null)
+        if (audioSource.clip != null && isBroadcasting.Value)
         {
-            audioSource.Play();
+            // Play immediately, restarting if necessary
+            audioSource.PlayOneShot(audioSource.clip);
             Debug.Log($"Whistle played after {delay}s delay on client {NetworkManager.Singleton.LocalClientId}");
         }
+
+        else if (!isBroadcasting.Value)
+        {
+            // Play immediately, restarting if necessary
+            audioSource.Stop();
+            Debug.Log("Stop Playing_________________________");
+        }
+
         else
         {
             Debug.LogWarning("No AudioClip assigned on AudioSource!");
+
         }
     }
 
