@@ -10,7 +10,7 @@ public class WhistleSound : NetworkBehaviour
 
     public bool isSoundActivated = false;
     public NetworkVariable<bool> isBroadcasting = new NetworkVariable<bool>(
-      true,
+      false,
       NetworkVariableReadPermission.Everyone,
       NetworkVariableWritePermission.Server
   );
