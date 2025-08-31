@@ -2597,6 +2597,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: caff95c594e38dc4aaa141049a56c3b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSoundActivated: 0
+  isBroadcasting:
+    m_InternalValue: 0
 --- !u!82 &276889279
 AudioSource:
   m_ObjectHideFlags: 0
@@ -14174,6 +14177,37 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1435374171}
   m_CullTransparentMesh: 1
+--- !u!1 &1444952660
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1444952661}
+  m_Layer: 0
+  m_Name: SpawnPoint3
+  m_TagString: SpawnPoint
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1444952661
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1444952660}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -4.887, y: 0, z: -18.670002}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1450720530
 GameObject:
   m_ObjectHideFlags: 0
@@ -14557,7 +14591,7 @@ Transform:
   m_GameObject: {fileID: 1479733576}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -4.887, y: 0, z: -18.670002}
+  m_LocalPosition: {x: -3.53, y: 0, z: -20.65}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -19119,7 +19153,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3130830557821445414, guid: 0f874d7acb686f644b6043ba39bba74f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 17
+      value: 16.999939
       objectReference: {fileID: 0}
     - target: {fileID: 3130830557849588012, guid: 0f874d7acb686f644b6043ba39bba74f, type: 3}
       propertyPath: m_AnchorMax.y
@@ -19498,6 +19532,7 @@ SceneRoots:
   - {fileID: 1643753570}
   - {fileID: 917202405}
   - {fileID: 1479733577}
+  - {fileID: 1444952661}
   - {fileID: 741154170}
   - {fileID: 1936197676}
   - {fileID: 6586575712034653800}
