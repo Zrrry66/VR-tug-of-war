@@ -22,6 +22,8 @@ public class SimpleHapticRepeater : NetworkBehaviour
         NetworkVariableWritePermission.Server
     );
 
+    
+
     private Coroutine hapticCoroutine;
     private bool lastInspectorValue;
 
@@ -90,4 +92,15 @@ public class SimpleHapticRepeater : NetworkBehaviour
             StopCoroutine(hapticCoroutine);
         }
     }
+
+
+    public void activeHaptic()
+    {
+        hapticDefault = true;
+    }
+    public void deActiveHaptic()
+    {
+        hapticDefault = false;
+    }
+
 }

@@ -64,7 +64,7 @@ public class WhistleSound : NetworkBehaviour
             // stop the audio everywhere
             StopWhistleClientRpc();
 
-            yield return new WaitForSeconds(5f);
+            yield return new WaitForSeconds(2f);
         }
     }
 
@@ -87,5 +87,14 @@ public class WhistleSound : NetworkBehaviour
     void LogMessageClientRpc(string message)
     {
         Debug.Log(message);
+    }
+
+    public void activeSound()
+    {
+        isSoundActivated = true;
+    }
+    public void deActiveSound()
+    {
+        isSoundActivated = false;
     }
 }
