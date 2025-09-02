@@ -7,95 +7,94 @@ using System.Collections.Generic;
 public class WhistleHapticBroadcast : NetworkBehaviour
 {
 
-    [Header("Haptic Settings")]
-    [Range(0f, 1f)] public float amplitude = 0.2f; // strength of vibration
-    public float duration = 0.5f;                  // duration of each vibration
-    public float interval = 3.5f;                  // repeat interval in seconds
-
-
+    [Header("Audio")]
+    public AudioClip whistleClip;
     private AudioSource audioSource;
 
+    [Header("Haptic Settings")]
+    [Range(0f, 1f)] public float amplitude = 0.5f;
+    public float duration = 0.1f;
+    public float sensitivity = 1.5f; // Higher = fewer beats detected
+
+    private float[] samples = new float[512];
+    private float[] historyBuffer = new float[43];
+    private int bufferIndex = 0;
+
     private NetworkVariable<bool> isHapticSound = new NetworkVariable<bool>(
-       false,
-       NetworkVariableReadPermission.Everyone,
-       NetworkVariableWritePermission.Server
-       );
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
 
-
-    [Header("Inspector-controlled Haptics")]
-    [Tooltip("Enable/disable haptics from Inspector at runtime (server only)")]
     [SerializeField] private bool hapticDefault = false;
-
-
-
-    private Coroutine hapticCoroutine;
     private bool lastInspectorValue;
-
-
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
-        Debug.Log("Server Started Haptic Sound ");
-        
     }
 
-
-
-    private void Update()
+    void Update()
     {
-        if (!IsServer) return; // only server can update synced value
+        if (!IsServer) return;
+
+        // Sync inspector toggle with clients
         if (hapticDefault != lastInspectorValue)
         {
             isHapticSound.Value = hapticDefault;
             lastInspectorValue = hapticDefault;
-        }
-    }
 
-    public override void OnNetworkSpawn()
-    {
-        if (IsServer)
+            if (hapticDefault && whistleClip != null)
+            {
+                audioSource.clip = whistleClip;
+                audioSource.loop = true;
+                audioSource.Play();
+            }
+            else
+            {
+                audioSource.Stop();
+            }
+        }
+
+        if (isHapticSound.Value && audioSource.isPlaying)
         {
-            isHapticSound.Value = hapticDefault; // initial value from Inspector
-            lastInspectorValue = hapticDefault;
-            Debug.Log("Server Started Haptic Sound Coroutine started");
-            hapticCoroutine = StartCoroutine(ServerLoop());
+            if (DetectBeat())
+            {
+                TriggerHapticsSoundClientRpc(amplitude, duration);
+            }
         }
     }
 
-
-    private IEnumerator ServerLoop()
+    private bool DetectBeat()
     {
-        // optional: trigger first vibration immediately
-        TriggerHapticsSoundClientRpc(amplitude, duration);
+        audioSource.GetSpectrumData(samples, 0, FFTWindow.BlackmanHarris);
 
-        while (true)
+        // Compute average energy in spectrum
+        float instantEnergy = 0f;
+        for (int i = 0; i < samples.Length; i++)
         {
-            yield return new WaitForSeconds(interval);
-            Debug.Log("Sound Haptic played");
-            TriggerHapticsSoundClientRpc(amplitude, duration);
-            yield return new WaitForSeconds(1.5f);
-            StopWhistleClientRpc();
+            instantEnergy += samples[i] * samples[i];
         }
-    }
 
+        // Compute average from history buffer
+        float avgEnergy = 0f;
+        foreach (float val in historyBuffer) avgEnergy += val;
+        avgEnergy /= historyBuffer.Length;
+
+        // Store current energy
+        historyBuffer[bufferIndex] = instantEnergy;
+        bufferIndex = (bufferIndex + 1) % historyBuffer.Length;
+
+        // Beat detected if energy is much higher than average
+        return instantEnergy > avgEnergy * sensitivity;
+    }
 
     [ClientRpc]
     private void TriggerHapticsSoundClientRpc(float amp, float dur)
     {
-        if (!isHapticSound.Value) return; // only vibrate if enabled
         VibrateLocalDevice(amp, dur);
-        audioSource.PlayOneShot(audioSource.clip);
     }
-
-    [ClientRpc]
-    void StopWhistleClientRpc()
-    {
-        audioSource.Stop();
-    }
-
-
 
     private void VibrateLocalDevice(float amp, float dur)
     {
