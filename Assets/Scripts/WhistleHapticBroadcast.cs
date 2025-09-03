@@ -47,13 +47,11 @@ public class WhistleHapticBroadcast : NetworkBehaviour
 
             if (hapticDefault && whistleClip != null)
             {
-                audioSource.clip = whistleClip;
-                audioSource.loop = true;
-                audioSource.Play();
+                PlayWhistleClientRpc();
             }
             else
             {
-                audioSource.Stop();
+                StopWhistleClientRpc();
             }
         }
 
@@ -89,6 +87,22 @@ public class WhistleHapticBroadcast : NetworkBehaviour
         // Beat detected if energy is much higher than average
         return instantEnergy > avgEnergy * sensitivity;
     }
+
+
+    [ClientRpc]
+    void PlayWhistleClientRpc()
+    {
+        audioSource.clip = whistleClip;
+        audioSource.loop = true;
+        audioSource.Play();
+    }
+
+    [ClientRpc]
+    void StopWhistleClientRpc()
+    {
+        audioSource.Stop();
+    }
+
 
     [ClientRpc]
     private void TriggerHapticsSoundClientRpc(float amp, float dur)
