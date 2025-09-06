@@ -27,12 +27,14 @@ public class WhistleHapticBroadcast : NetworkBehaviour
     );
 
     [SerializeField] private bool hapticDefault = false;
+    [SerializeField] private bool isConfig = false;
     private bool lastInspectorValue;
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
         audioSource.playOnAwake = false;
+        StartCoroutine(OnOffLoop());
     }
 
     void Update()
@@ -125,6 +127,33 @@ public class WhistleHapticBroadcast : NetworkBehaviour
             }
         }
     }
+    //{ }
+    private IEnumerator OnOffLoop()
+    { 
+    
+            while(true)
+            {
+
+              if(isConfig)
+                {
+                    yield return new WaitForSeconds(3);
+                    hapticDefault = false;
+                    yield return new WaitForSeconds(3);
+                    hapticDefault = true;
+                }
+
+            yield return null;
+        }
+       
+    }
 
 
+    public void EnableConfig() {
+        isConfig = true;
+    }
+
+
+    public void DisablConfig() {
+        isConfig = false;
+    }
 }
