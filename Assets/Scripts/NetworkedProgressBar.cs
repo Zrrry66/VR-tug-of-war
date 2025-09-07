@@ -25,6 +25,10 @@ public class NetworkedProgressBar : NetworkBehaviour
     [SerializeField] 
     private Button reloadButton;
 
+    [SerializeField]
+    private GameObject gameManager;
+    private TimeCalculator gameManagerTimerCalculator;
+
     public NetworkMusicManager musicManager;
 
     [Header("Progress Settings")]
@@ -42,7 +46,7 @@ public class NetworkedProgressBar : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-
+        gameManagerTimerCalculator = gameManager.GetComponent<TimeCalculator>();
         if (IsOwner)
         {
             // Ensure all references have been assigned
@@ -141,6 +145,7 @@ public class NetworkedProgressBar : NetworkBehaviour
         //reloadButton.gameObject.SetActive(true);
         Time.timeScale = 0f;                    // Pause game locally
         gameEnded = true;                       // Prevent further updates
+        gameManagerTimerCalculator.StopTimerRPC();
         if(IsOwner)
             musicManager.StopMusicClientRpc();
     }

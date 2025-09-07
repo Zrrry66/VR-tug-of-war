@@ -6,7 +6,7 @@ public class SyncroniCalculator : NetworkBehaviour
 {
     private Queue<string> msgQueue = new Queue<string>();
     public GameObject targetObject;  // Assign via Inspector
-    public float moveDistance = 2f;
+    public float moveDistance = 0.5f;
 
     private void Start()
     {
