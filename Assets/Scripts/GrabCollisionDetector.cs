@@ -28,6 +28,10 @@ public class GrabCollisionDetector : NetworkBehaviour
     private InputDevice rightHandDevice;
     private bool hapticInitialized = false;
 
+
+    private float timeCalculate;
+    private int collisionCount = 0;
+
     void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -39,6 +43,7 @@ public class GrabCollisionDetector : NetworkBehaviour
                        | RigidbodyConstraints.FreezeRotationZ;
 
         flag = 0;
+        collisionCount = 0;
     }
 
     public void OnGrab()
@@ -80,7 +85,8 @@ public class GrabCollisionDetector : NetworkBehaviour
             // Second-touch feedback:
             GameObject secondPoint = other.gameObject;
             SetColor(secondPoint, Color.green);// Sphere2 turns green
-
+            collisionCount++;
+            Debug.Log("Collision Counted from Gameobject "+ gameObject.name + "Total count "+ collisionCount);
             // Cancel first-touch timeout
             if (firstTimeoutCoroutine != null)
                 StopCoroutine(firstTimeoutCoroutine);
@@ -93,9 +99,10 @@ public class GrabCollisionDetector : NetworkBehaviour
                 Debug.Log("Calling MoveObjectServerRpc");
                 MoveObjectServerRpc();
             }
-            
+            timeCalculate = Time.time;
             // Reset colors after 1 second
             StartCoroutine(ResetBothAfterDelay(secondPoint));
+
         }
         else
         {
@@ -192,5 +199,17 @@ public class GrabCollisionDetector : NetworkBehaviour
 
         // Stop any ongoing haptics
         rightHandDevice.StopHaptics();
+    }
+
+
+    public float GetColliedTime()
+    {
+        return timeCalculate;
+    }
+
+    public int getCollisionCount()
+    {
+        Debug.Log("Final Collision Counted from Gameobject " + gameObject.name + "Total count " + collisionCount);
+        return collisionCount;
     }
 }

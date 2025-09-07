@@ -5721,6 +5721,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1643753573}
+        m_TargetAssemblyTypeName: TimeCalculator, Assembly-CSharp
+        m_MethodName: StartTimerRPC
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &503771597
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6501,6 +6513,52 @@ MonoBehaviour:
   m_ConstrainOrientation: 0
   m_Compliance: 0
   breakThreshold: Infinity
+--- !u!1 &534371585
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 534371587}
+  - component: {fileID: 534371586}
+  m_Layer: 0
+  m_Name: BurstCollisionWorld
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &534371586
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534371585}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1a161c4294214a4fbcb7e9e94800494, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cellSpans:
+    m_AlignBytes: 16
+--- !u!4 &534371587
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534371585}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &543509598
 GameObject:
   m_ObjectHideFlags: 0
@@ -11499,6 +11557,7 @@ MonoBehaviour:
   messageText: {fileID: 461898151}
   restartButton: {fileID: 502299350}
   reloadButton: {fileID: 992795744}
+  gameManager: {fileID: 1643753568}
   musicManager: {fileID: 1430141289}
   maxDistance: 5
 --- !u!114 &1118018686
@@ -12893,7 +12952,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 629465468}
-  moveDistance: 0.5
+  moveDistance: 1
+  threshold: 2.5
+  grabP1: {fileID: 354839437}
+  grabP2: {fileID: 374271889}
 --- !u!114 &1289312728
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15201,6 +15263,7 @@ GameObject:
   - component: {fileID: 1643753569}
   - component: {fileID: 1643753571}
   - component: {fileID: 1643753572}
+  - component: {fileID: 1643753573}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -15277,52 +15340,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b7630eeff4c6a4ca18399f900cbc7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1 &1679921608
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1679921610}
-  - component: {fileID: 1679921609}
-  m_Layer: 0
-  m_Name: BurstCollisionWorld
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1679921609
+--- !u!114 &1643753573
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679921608}
+  m_GameObject: {fileID: 1643753568}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1a161c4294214a4fbcb7e9e94800494, type: 3}
+  m_Script: {fileID: 11500000, guid: a334d4de5df59b34c8295d158ba0bbf8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cellSpans:
-    m_AlignBytes: 16
---- !u!4 &1679921610
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1679921608}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  TrailId: 
+  timeToCompleteTheTask: 
+  studyManager: {fileID: 796398692}
+  networkStudyManager: {fileID: 0}
+  TrailConfig: 0
+  Syncroniobject: {fileID: 1289312724}
+  syncCalc: {fileID: 0}
+  TotalSyncroniCount: 0
+  Latency: 0
+  grab1: {fileID: 354839437}
+  cl1: {fileID: 0}
+  pullPerformed1: 0
+  grab2: {fileID: 374271889}
+  cl2: {fileID: 0}
+  PullPerformed2: 0
 --- !u!1 &1696237268
 GameObject:
   m_ObjectHideFlags: 0
@@ -19795,4 +19839,4 @@ SceneRoots:
   - {fileID: 276889280}
   - {fileID: 1850107347}
   - {fileID: 796398694}
-  - {fileID: 1679921610}
+  - {fileID: 534371587}

@@ -17,6 +17,8 @@ public class NetworkStudyManagerTOW : NetworkBehaviour
 
     //{}
 
+
+
     void Start()
     {
         wistlesoundBroadCast = soundBroadcast.GetComponent<WhistleSound>();
@@ -61,5 +63,13 @@ public class NetworkStudyManagerTOW : NetworkBehaviour
         }
 
     }
+
+
+    public int getConfig()
+    {
+        return condition;
+    }
+
+
 
 }
