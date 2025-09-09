@@ -9,7 +9,7 @@ public class TimeCalculator : NetworkBehaviour
     private float endTime;
     private bool isTimerRunning = false;
 
-    public string TrailId; // generate after StartTimerRPC
+    public string GroupId; // generate after StartTimerRPC
     public string timeToCompleteTheTask;
 
 
@@ -62,10 +62,10 @@ public class TimeCalculator : NetworkBehaviour
 
     private void Awake()
     {
-
+        Debug.Log($"Awake to Create File");
 
         // Fixed path for Windows
-        string folderPath = @"C:\Users\TagofWarTrail";
+        string folderPath = @"C:\Users\unity-developer\Desktop\tug of war";
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);
@@ -76,7 +76,7 @@ public class TimeCalculator : NetworkBehaviour
         // If file does not exist, create header
         if (!File.Exists(filePath))
         {
-            string header = "TrailId,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
+            string header = "GroupId,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
             File.WriteAllText(filePath, header + Environment.NewLine);
         }
     }
@@ -92,9 +92,9 @@ public class TimeCalculator : NetworkBehaviour
         isTimerRunning = true;
 
         // Generate unique TrailId
-        TrailId = Guid.NewGuid().ToString();
+        //TrailId = Guid.NewGuid().ToString();
 
-        Debug.Log($"Timer started. TrailId: {TrailId}, StartTime: {startTime}");
+        Debug.Log($"Timer started. TrailId: {GroupId}, StartTime: {startTime}");
     }
 
     // Called from another script
@@ -109,9 +109,10 @@ public class TimeCalculator : NetworkBehaviour
         float totalTime = endTime - startTime;
         timeToCompleteTheTask = totalTime.ToString("F2") + " seconds";
 
-        Debug.Log($"Task completed in: {timeToCompleteTheTask} (TrailId: {TrailId})");
+        Debug.Log($"Task completed in: {timeToCompleteTheTask} (TrailId: {GroupId})");
 
         TrailConfig = networkStudyManager.getConfig();
+        Latency = networkStudyManager.getLatency();
         TotalSyncroniCount = syncCalc.getSyncroni();
         pullPerformed1 = cl1.getCollisionCount();
         PullPerformed2 = cl2.getCollisionCount();
@@ -125,7 +126,7 @@ public class TimeCalculator : NetworkBehaviour
     private void SaveTrailDataServerRpc()
     {
 
-        string newLine = $"{TrailId},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
+        string newLine = $"{GroupId},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
         File.AppendAllText(filePath, newLine + Environment.NewLine);
 
         Debug.Log($"Data saved to CSV: {filePath}");
