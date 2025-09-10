@@ -8,7 +8,7 @@ public class SyncroniCalculator : NetworkBehaviour
     public GameObject targetObject;  // Assign via Inspector
     public float moveDistance = 1.5f;
 
-    public float threshold = 70.5f;
+    public float threshold = 200.5f;
     public GameObject grabP1;
     public GameObject grabP2;
 
@@ -24,7 +24,7 @@ public class SyncroniCalculator : NetworkBehaviour
         Debug.Log("SyncroniCalculator started.");
         grabCollied1 = grabP1.GetComponent<GrabCollisionDetector>();
         grabCollied2 = grabP2.GetComponent<GrabCollisionDetector>();
-        threshold = 70.5f;
+        threshold = 200.5f;
     }
 
     private void Update()
