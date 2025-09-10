@@ -59,7 +59,7 @@ public class GrabCollisionDetector : NetworkBehaviour
         if (!IsOwner)
         {
             Debug.Log("Not the owner, ignoring trigger");
-            return;
+           // return;
         }
 
         if (other.CompareTag("Point1") && flag == 0)
