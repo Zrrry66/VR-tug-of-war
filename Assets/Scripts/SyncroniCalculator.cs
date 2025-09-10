@@ -52,6 +52,7 @@ public class SyncroniCalculator : NetworkBehaviour
                 msgQueue.Clear();
                // SyncroniCount++;
                 Debug.Log("Syncroni count "+SyncroniCount);
+                Debug.Log("Threshold Time "+eventDiff);
                 if(eventDiff<=threshold)
                 {
                     MoveObjectForward();
