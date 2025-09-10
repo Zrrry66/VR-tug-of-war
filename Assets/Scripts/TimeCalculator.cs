@@ -34,7 +34,7 @@ public class TimeCalculator : NetworkBehaviour
     public int PullPerformed2 = 11; // handled externally
 
     private string filePath;
-
+    int TrailId = 0;
 
     void Start()
     { 
@@ -52,7 +52,9 @@ public class TimeCalculator : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (!IsServer)
+
         { return; }
+        TrailId = 0;
         Debug.Log("Started Timer script");
         networkStudyManager = studyManager.GetComponent<NetworkStudyManagerTOW>();
         syncCalc = Syncroniobject.GetComponent<SyncroniCalculator>();
@@ -71,12 +73,12 @@ public class TimeCalculator : NetworkBehaviour
             Directory.CreateDirectory(folderPath);
         }
 
-        filePath = Path.Combine(folderPath, "TrailData.csv");
+        filePath = Path.Combine(folderPath, GroupId+".csv");
 
         // If file does not exist, create header
         if (!File.Exists(filePath))
         {
-            string header = "GroupId,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
+            string header = "TrailID,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
             File.WriteAllText(filePath, header + Environment.NewLine);
         }
     }
@@ -117,7 +119,7 @@ public class TimeCalculator : NetworkBehaviour
         pullPerformed1 = cl1.getCollisionCount();
         PullPerformed2 = cl2.getCollisionCount();
 
-
+        Debug.Log($"Calling save on file: {filePath}");
         // Save to CSV
         SaveTrailDataServerRpc();
     }
@@ -126,9 +128,9 @@ public class TimeCalculator : NetworkBehaviour
     private void SaveTrailDataServerRpc()
     {
 
-        string newLine = $"{GroupId},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
+        string newLine = $"{TrailId},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
         File.AppendAllText(filePath, newLine + Environment.NewLine);
-
+        TrailId++;
         Debug.Log($"Data saved to CSV: {filePath}");
     }
 }

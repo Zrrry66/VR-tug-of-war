@@ -72,16 +72,19 @@ public class NetworkStudyManagerTOW : NetworkBehaviour
 
         else if (condition == 3 && isGameStarted)
         {
+            wistlesoundBroadCast.deActiveSound();
+            simpleHapticBroadacast.deActiveHaptic();
+            whistlHapticBroadcast.EnableConfig();
+        }
+
+        else if (condition == 4 && isGameStarted)
+        {
             wistlesoundBroadCast.activeSound();
             simpleHapticBroadacast.activeHaptic();
             whistlHapticBroadcast.DisablConfig();
         }
 
-        else if(condition == 4 && isGameStarted) {
-            wistlesoundBroadCast.deActiveSound();
-            simpleHapticBroadacast.deActiveHaptic();
-            whistlHapticBroadcast.EnableConfig();
-        }
+       
 
     }
 
@@ -142,6 +145,19 @@ public class NetworkStudyManagerTOW : NetworkBehaviour
         SetLatencyRpc(latency);
     }
 
+    public void ReRunClumsy()
+    {
+        RemoveLatencyRpc();
+        SetLatencyRpc(latency);
+    }
+
+
+    [Rpc(SendTo.Server, RequireOwnership = false)]
+    private void RemoveLatencyRpc()
+    {
+        Process.Start("taskkill", "/IM clumsy.exe /F");
+        Debug.Log("Latency was removed");
+    }
 
 
 

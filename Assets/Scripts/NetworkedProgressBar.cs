@@ -139,6 +139,8 @@ public class NetworkedProgressBar : NetworkBehaviour
     [Rpc(SendTo.Everyone, RequireOwnership = true)]
     private void ShowEndMessageRpc(string msg)
     {
+        Debug.Log("Calling stop server");
+        gameManagerTimerCalculator.StopTimerRPC();
         messageText.gameObject.SetActive(true); // Make text visible
         messageText.text = msg;                 // Set content
         restartButton.gameObject.SetActive(true); // Show restart button
