@@ -9,10 +9,8 @@ public class TimeCalculator : NetworkBehaviour
     private float endTime;
     private bool isTimerRunning = false;
 
-    public string GroupId; // generate after StartTimerRPC
+    private string GroupId; // generate after StartTimerRPC
     public string timeToCompleteTheTask;
-
-
 
     public GameObject studyManager;
     public NetworkStudyManagerTOW networkStudyManager;
@@ -62,6 +60,13 @@ public class TimeCalculator : NetworkBehaviour
         cl2 = grab2.GetComponent<GrabCollisionDetector>();
     }
 
+
+    public void setGroupID(string gID)
+    {
+        Debug.Log("GroupID set "+gID);
+        GroupId = gID;
+    }
+
     private void Awake()
     {
         Debug.Log($"Awake to Create File");
@@ -73,12 +78,12 @@ public class TimeCalculator : NetworkBehaviour
             Directory.CreateDirectory(folderPath);
         }
 
-        filePath = Path.Combine(folderPath, GroupId+".csv");
+        filePath = Path.Combine(folderPath, "TagofWarPilotStudy1.csv");
 
         // If file does not exist, create header
         if (!File.Exists(filePath))
         {
-            string header = "TrailID,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
+            string header = "TrailID,Group_ID,StartTime,EndTime,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
             File.WriteAllText(filePath, header + Environment.NewLine);
         }
     }
@@ -109,7 +114,7 @@ public class TimeCalculator : NetworkBehaviour
         isTimerRunning = false;
 
         float totalTime = endTime - startTime;
-        timeToCompleteTheTask = totalTime.ToString("F2") + " seconds";
+        timeToCompleteTheTask = totalTime.ToString("F2");
 
         Debug.Log($"Task completed in: {timeToCompleteTheTask} (TrailId: {GroupId})");
 
@@ -128,7 +133,7 @@ public class TimeCalculator : NetworkBehaviour
     private void SaveTrailDataServerRpc()
     {
 
-        string newLine = $"{TrailId},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
+        string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
         File.AppendAllText(filePath, newLine + Environment.NewLine);
         TrailId++;
         Debug.Log($"Data saved to CSV: {filePath}");
