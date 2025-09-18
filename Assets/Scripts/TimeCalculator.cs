@@ -78,7 +78,7 @@ public class TimeCalculator : NetworkBehaviour
             Directory.CreateDirectory(folderPath);
         }
 
-        filePath = Path.Combine(folderPath, "TagofWarPilotStudy1.csv");
+        filePath = Path.Combine(folderPath, "TagofWarPilotStudy_Sanchi_Kirti_2.csv");
 
         // If file does not exist, create header
         if (!File.Exists(filePath))
