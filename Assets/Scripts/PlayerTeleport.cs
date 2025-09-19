@@ -94,7 +94,8 @@ public class PlayerTeleport : NetworkBehaviour
       for (int i = 0; i<users.Length; ++i)
        {
            users[i].transform.position = spawnPoints[i % spawnPoints.Length].position;
-           spawnPoints[i % spawnPoints.Length].GetComponent<GetSetUserID>().SetUserId(users[i].userName.Value.ToString());
+           Debug.Log("The name of game object "+users[i].gameObject.name);
+           spawnPoints[i % spawnPoints.Length].GetComponent<GetSetUserID>().SetUserId(users[i].gameObject.name);
       }
    }
 }

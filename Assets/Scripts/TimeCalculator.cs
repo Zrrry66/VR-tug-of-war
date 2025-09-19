@@ -144,7 +144,7 @@ public class TimeCalculator : NetworkBehaviour
     private void SaveTrailDataServerRpc()
     {
 
-        string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2},{userId1},{userId2}";
+        string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2},{userId1.GetUserId()},{userId2.GetUserId()}";
         File.AppendAllText(filePath, newLine + Environment.NewLine);
         TrailId++;
         Debug.Log($"Data saved to CSV: {filePath}");
