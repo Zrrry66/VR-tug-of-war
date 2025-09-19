@@ -27,6 +27,13 @@ public class TimeCalculator : NetworkBehaviour
     public GrabCollisionDetector cl1;
     public int pullPerformed1 = 10; // handled externally
 
+    public GameObject userSpawnId1;
+    public GetSetUserID userId1;
+
+    public GameObject userSpawnId2;
+    public GetSetUserID userId2;
+
+
     public GameObject grab2;
     public GrabCollisionDetector cl2;
     public int PullPerformed2 = 11; // handled externally
@@ -43,6 +50,8 @@ public class TimeCalculator : NetworkBehaviour
         syncCalc = Syncroniobject.GetComponent<SyncroniCalculator>();
         cl1 = grab1.GetComponent<GrabCollisionDetector>();
         cl2 = grab2.GetComponent<GrabCollisionDetector>();
+        userId1 = userSpawnId1.GetComponent<GetSetUserID>();
+        userId2 = userSpawnId2.GetComponent<GetSetUserID>();
 
     }
 
@@ -78,12 +87,12 @@ public class TimeCalculator : NetworkBehaviour
             Directory.CreateDirectory(folderPath);
         }
 
-        filePath = Path.Combine(folderPath, "TagofWarPilotStudy_Sanchi_Kirti_2.csv");
+        filePath = Path.Combine(folderPath, "TagofWarPilotStudy_Sanchi_Kirti_With Uid_2.csv");
 
         // If file does not exist, create header
         if (!File.Exists(filePath))
         {
-            string header = "TrailID,Group_ID,StartTime,EndTime,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2";
+            string header = "TrailID,Group_ID,StartTime,EndTime,TimeToComplete,TrailConfig,TotalSyncroniCount,Latency,PullPerformed1,PullPerformed2,UserId1,UserId2";
             File.WriteAllText(filePath, header + Environment.NewLine);
         }
     }
@@ -133,7 +142,7 @@ public class TimeCalculator : NetworkBehaviour
     private void SaveTrailDataServerRpc()
     {
 
-        string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2}";
+        string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2},{userId1},{userId2}";
         File.AppendAllText(filePath, newLine + Environment.NewLine);
         TrailId++;
         Debug.Log($"Data saved to CSV: {filePath}");
