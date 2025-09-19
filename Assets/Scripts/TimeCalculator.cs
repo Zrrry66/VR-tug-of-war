@@ -67,6 +67,8 @@ public class TimeCalculator : NetworkBehaviour
         syncCalc = Syncroniobject.GetComponent<SyncroniCalculator>();
         cl1 = grab1.GetComponent<GrabCollisionDetector>();
         cl2 = grab2.GetComponent<GrabCollisionDetector>();
+        userId1 = userSpawnId1.GetComponent<GetSetUserID>();
+        userId2 = userSpawnId2.GetComponent<GetSetUserID>();
     }
 
 
