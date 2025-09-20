@@ -83,7 +83,7 @@ public class TimeCalculator : NetworkBehaviour
         Debug.Log($"Awake to Create File");
 
         // Fixed path for Windows
-        string folderPath = @"C:\Users\unity-developer\Desktop\tug of war";
+        string folderPath = @"D:\VRinSyncRuye";
         if (!Directory.Exists(folderPath))
         {
             Directory.CreateDirectory(folderPath);
@@ -137,16 +137,55 @@ public class TimeCalculator : NetworkBehaviour
 
         Debug.Log($"Calling save on file: {filePath}");
         // Save to CSV
+       // TestCall();
         SaveTrailDataServerRpc();
+       // TestCalled();
     }
+
+
+    private void TestCall()
+    {
+        Debug.Log("Test call called Started");
+    }
+
+    private void TestCalled()
+    {
+        Debug.Log("Test call called ended");
+        try
+        {
+            String a = userId1.GetUserId();
+            String b = userId2.GetUserId();
+
+
+            string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2},{a},{b}";
+
+            File.AppendAllText(filePath, newLine + Environment.NewLine);
+            TrailId++;
+
+            Debug.Log($"[Server] Data saved to CSV: {filePath}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[Server] Failed to save trail data. Exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
+        }
+    }
+
 
     [ServerRpc(RequireOwnership = false)]
     private void SaveTrailDataServerRpc()
     {
+        try
+        {
+            string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2},{userId1.GetUserId()},{userId2.GetUserId()}";
 
-        string newLine = $"{TrailId},{GroupId},{startTime},{endTime},{timeToCompleteTheTask},{TrailConfig},{TotalSyncroniCount},{Latency},{pullPerformed1},{PullPerformed2},{userId1.GetUserId()},{userId2.GetUserId()}";
-        File.AppendAllText(filePath, newLine + Environment.NewLine);
-        TrailId++;
-        Debug.Log($"Data saved to CSV: {filePath}");
+            File.AppendAllText(filePath, newLine + Environment.NewLine);
+            TrailId++;
+
+            Debug.Log($"[Server] Data saved to CSV: {filePath}");
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"[Server] Failed to save trail data. Exception: {ex.Message}\nStackTrace: {ex.StackTrace}");
+        }
     }
 }

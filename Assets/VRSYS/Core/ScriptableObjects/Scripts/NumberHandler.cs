@@ -9,7 +9,7 @@ public class NumberHandler : NetworkBehaviour
     private NetworkVariable<int> y = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     // Use absolute path (Windows)
-    private string filePath = @"C:\Users\unity-developer\Desktop\tug of war\numbers.txt";
+    private string filePath = @"D:\VRinSyncRuye\numbers.txt";
 
     private void Start()
     {

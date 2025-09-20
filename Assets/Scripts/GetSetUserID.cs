@@ -15,6 +15,14 @@ public class GetSetUserID : NetworkBehaviour
     // Get the user ID
     public string GetUserId()
     {
-        return userID;
+        try
+        {
+            Debug.Log("Here is your User Id "+userID);
+            return userID;
+        }
+        catch
+        {
+            return "NA";
+        }
     }
 }
