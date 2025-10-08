@@ -5,7 +5,7 @@ using UnityEngine.XR;
 
 public class GrabCollisionDetector : NetworkBehaviour
 {
-    //private float lastTriggerTime = -1f;
+    private float lastTriggerTime = -1f;
     public float cooldown = 0.5f;
 
     public int flag = 0;
@@ -28,11 +28,6 @@ public class GrabCollisionDetector : NetworkBehaviour
     private InputDevice rightHandDevice;
     private bool hapticInitialized = false;
 
-    //beat detector
-    public BeatDetector beatDetector;
-    public float beatVibrationAmplitude = 0.2f;
-    public float beatVibrationDuration = 0.1f;
-
     void Start()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
@@ -44,26 +39,9 @@ public class GrabCollisionDetector : NetworkBehaviour
                        | RigidbodyConstraints.FreezeRotationZ;
 
         flag = 0;
-
-        if (IsOwner && IsClient && beatDetector != null)
-            beatDetector.OnBeatDetected.AddListener(HandleBeatDetected);
-
     }
 
-    void OnDisable()
-   {
-        if (IsOwner && IsClient && beatDetector != null)
-            beatDetector.OnBeatDetected.RemoveListener(HandleBeatDetected);
-    }
-
-   // when detected whistle, call vibration
-   public void HandleBeatDetected()
-   {
-        if (!IsOwner || !IsClient) return;  // only local owner vibrates
-        StartCoroutine(Vibrate(beatVibrationAmplitude, beatVibrationDuration));
-   }
-
-public void OnGrab()
+    public void OnGrab()
     {
         Rigidbody rb = GetComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.None;
@@ -72,13 +50,13 @@ public void OnGrab()
     private void OnTriggerEnter(Collider other)
     {
         Debug.Log("Trigger enter called on " + gameObject.name);
-        
-        //if (!IsOwner)
-        //{
-        //    Debug.Log("Not the owner, ignoring trigger");
-        //    return;
-        //}
-        
+
+        if (!IsOwner)
+        {
+            Debug.Log("Not the owner, ignoring trigger");
+            return;
+        }
+
         if (other.CompareTag("Point1") && flag == 0)
         {
             Debug.Log("Detect collision with Point1");
@@ -109,7 +87,7 @@ public void OnGrab()
                 StopCoroutine(firstTimeoutCoroutine);
 
             // Trigger haptic vibration on controller
-            StartCoroutine(Vibrate(0.4f, 0.2f)); // 40% amplitude for 0.2s
+            StartCoroutine(Vibrate(0.4f, 0.2f)); // 50% amplitude for 0.2s
 
             if (objectToMove != null)
             {
@@ -127,7 +105,7 @@ public void OnGrab()
         }
     }
 
-    [ServerRpc(RequireOwnership = false)]
+    [ServerRpc]
     void MoveObjectServerRpc()
     {
         if (objectToMove != null)
@@ -196,8 +174,6 @@ public void OnGrab()
     /// <param name="duration">Duration in seconds</param>
     private IEnumerator Vibrate(float amplitude, float duration)
     {
-        if (!IsOwner || !IsClient) yield break;  // local guard
-
         if (!hapticInitialized)
             InitializeHapticDevice();
 
