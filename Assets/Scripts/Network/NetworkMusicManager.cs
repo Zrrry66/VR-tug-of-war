@@ -38,25 +38,22 @@ namespace VRInSync.Network
             Debug.Log($"[Client] NTP→DSP offset = {networkToDspOffset:F3}s");
         }
 
-        // This RPC runs on the server when a client requests playback
         [Rpc(SendTo.Server)]
         public void RequestStartMusicServerRpc()
         {
             if (!IsServer) return;
 
-            // get a fresh NTP time, add buffer, send ticks to all clients
             var nowUtc = NtpTime.GetNetworkTime();
             var startUtc = nowUtc.AddSeconds(2);
             long ticks = startUtc.Ticks;
 
             StartMusicClientRpc(ticks);
-            Debug.Log($"[Server] scheduled global start time: {startUtc:O}");
+            Debug.Log($"[Server] Scheduled global start time: {startUtc:O}");
         }
 
         [Rpc(SendTo.Everyone)]
         private void StartMusicClientRpc(long startTimeTicks)
         {
-            // resync offset for best accuracy
             SyncOffset();
 
             var startUtc = new DateTime(startTimeTicks, DateTimeKind.Utc);
@@ -93,7 +90,6 @@ namespace VRInSync.Network
 
         }
 
-        //stop music
         [Rpc(SendTo.Everyone)]
         public void StopMusicClientRpc()
         {
@@ -103,7 +99,6 @@ namespace VRInSync.Network
             audioSource4.Stop();
         }
 
-        // pause
         [Rpc(SendTo.Everyone)]
         public void PauseMusicClientRpc()
         {
@@ -113,7 +108,6 @@ namespace VRInSync.Network
             audioSource4.Pause();
         }
 
-        //resume
         [Rpc(SendTo.Everyone)]
         public void ResumeMusicClientRpc()
         {

@@ -3,8 +3,8 @@ using UnityEngine;
 using Unity.Netcode;
 public class BoxAutoMover : NetworkBehaviour
 {
-    public float moveDistance = 1f; //how far to move along each time
-    public float interval = 3f; // time interval between moves
+    public float moveDistance = 0.5f; //how far to move along each time
+    public float interval = 5f; // time interval between moves
     public float moveDuration = 1f; // duration over which the movement is smoothed
 
     //store initial position

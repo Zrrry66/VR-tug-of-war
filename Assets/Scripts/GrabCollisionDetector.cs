@@ -102,7 +102,8 @@ public void OnGrab()
             // Second-touch feedback:
             GameObject secondPoint = other.gameObject;
             SetColor(secondPoint, Color.green);// Sphere2 turns green
-
+            collisionCount++;
+            Debug.Log("Collision Counted from Gameobject "+ gameObject.name + "Total count "+ collisionCount);
             // Cancel first-touch timeout
             if (firstTimeoutCoroutine != null)
                 StopCoroutine(firstTimeoutCoroutine);
@@ -115,9 +116,10 @@ public void OnGrab()
                 Debug.Log("Calling MoveObjectServerRpc");
                 MoveObjectServerRpc();
             }
-            
+            timeCalculate = Time.time;
             // Reset colors after 1 second
             StartCoroutine(ResetBothAfterDelay(secondPoint));
+
         }
         else
         {
@@ -216,5 +218,17 @@ public void OnGrab()
 
         // Stop any ongoing haptics
         rightHandDevice.StopHaptics();
+    }
+
+
+    public float GetColliedTime()
+    {
+        return timeCalculate;
+    }
+
+    public int getCollisionCount()
+    {
+        Debug.Log("Final Collision Counted from Gameobject " + gameObject.name + "Total count " + collisionCount);
+        return collisionCount;
     }
 }

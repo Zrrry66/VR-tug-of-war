@@ -1,0 +1,159 @@
+using UnityEngine;
+using System.Collections;
+using Unity.Netcode; // <- add NGO namespace
+using UnityEngine.XR;
+using System.Collections.Generic;
+
+public class WhistleHapticBroadcast : NetworkBehaviour
+{
+
+    [Header("Audio")]
+    public AudioClip whistleClip;
+    private AudioSource audioSource;
+
+    [Header("Haptic Settings")]
+    [Range(0f, 1f)] public float amplitude = 0.5f;
+    public float duration = 0.1f;
+    public float sensitivity = 1.5f; // Higher = fewer beats detected
+
+    private float[] samples = new float[512];
+    private float[] historyBuffer = new float[43];
+    private int bufferIndex = 0;
+
+    private NetworkVariable<bool> isHapticSound = new NetworkVariable<bool>(
+        false,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    [SerializeField] private bool hapticDefault = false;
+    [SerializeField] private bool isConfig = false;
+    private bool lastInspectorValue;
+
+    void Start()
+    {
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        StartCoroutine(OnOffLoop());
+    }
+
+    void Update()
+    {
+        if (!IsServer) return;
+
+        // Sync inspector toggle with clients
+        if (hapticDefault != lastInspectorValue)
+        {
+            isHapticSound.Value = hapticDefault;
+            lastInspectorValue = hapticDefault;
+
+            if (hapticDefault && whistleClip != null)
+            {
+                PlayWhistleClientRpc();
+            }
+            else
+            {
+                StopWhistleClientRpc();
+            }
+        }
+
+        if (isHapticSound.Value && audioSource.isPlaying)
+        {
+            if (DetectBeat())
+            {
+                TriggerHapticsSoundClientRpc(amplitude, duration);
+            }
+        }
+    }
+
+    private bool DetectBeat()
+    {
+        audioSource.GetSpectrumData(samples, 0, FFTWindow.BlackmanHarris);
+
+        // Compute average energy in spectrum
+        float instantEnergy = 0f;
+        for (int i = 0; i < samples.Length; i++)
+        {
+            instantEnergy += samples[i] * samples[i];
+        }
+
+        // Compute average from history buffer
+        float avgEnergy = 0f;
+        foreach (float val in historyBuffer) avgEnergy += val;
+        avgEnergy /= historyBuffer.Length;
+
+        // Store current energy
+        historyBuffer[bufferIndex] = instantEnergy;
+        bufferIndex = (bufferIndex + 1) % historyBuffer.Length;
+
+        // Beat detected if energy is much higher than average
+        return instantEnergy > avgEnergy * sensitivity;
+    }
+
+
+    [ClientRpc]
+    void PlayWhistleClientRpc()
+    {
+        audioSource.clip = whistleClip;
+        audioSource.loop = true;
+        audioSource.Play();
+    }
+
+    [ClientRpc]
+    void StopWhistleClientRpc()
+    {
+        audioSource.Stop();
+    }
+
+
+    [ClientRpc]
+    private void TriggerHapticsSoundClientRpc(float amp, float dur)
+    {
+        VibrateLocalDevice(amp, dur);
+    }
+
+    private void VibrateLocalDevice(float amp, float dur)
+    {
+        var devices = new List<InputDevice>();
+        InputDevices.GetDevicesAtXRNode(XRNode.RightHand, devices);
+
+        foreach (var device in devices)
+        {
+            if (device.isValid &&
+                device.TryGetHapticCapabilities(out var caps) &&
+                caps.supportsImpulse)
+            {
+                device.SendHapticImpulse(0, Mathf.Clamp01(amp), dur);
+            }
+        }
+    }
+    //{ }
+    private IEnumerator OnOffLoop()
+    { 
+    
+            while(true)
+            {
+
+              if(isConfig)
+                {
+                    yield return new WaitForSeconds(3);
+                    hapticDefault = false;
+                    yield return new WaitForSeconds(3);
+                    hapticDefault = true;
+                }
+
+            yield return null;
+        }
+       
+    }
+
+
+    public void EnableConfig() {
+        isConfig = true;
+    }
+
+
+    public void DisablConfig() {
+        isConfig = false;
+    }
+}

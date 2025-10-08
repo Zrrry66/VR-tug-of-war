@@ -1,16 +1,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Unity.Netcode;
-
+//{ }
 public class SyncroniCalculator : NetworkBehaviour
 {
     private Queue<string> msgQueue = new Queue<string>();
     public GameObject targetObject;  // Assign via Inspector
-    public float moveDistance = 2f;
+    public float moveDistance = 1.5f;
+
+    public float threshold =5.5f;
+    public GameObject grabP1;
+    public GameObject grabP2;
+
+    private GrabCollisionDetector grabCollied1;
+    private GrabCollisionDetector grabCollied2;
+
+
+    private int SyncroniCount = 0;
 
     private void Start()
     {
+        SyncroniCount = 0;
         Debug.Log("SyncroniCalculator started.");
+        grabCollied1 = grabP1.GetComponent<GrabCollisionDetector>();
+        grabCollied2 = grabP2.GetComponent<GrabCollisionDetector>();
+        threshold = 5.5f;
     }
 
     private void Update()
@@ -28,9 +42,23 @@ public class SyncroniCalculator : NetworkBehaviour
             if ((pop1 == "ropeGrab1" && pop2 == "ropeGrab2") ||
                 (pop1 == "ropeGrab2" && pop2 == "ropeGrab1"))
             {
+
+                float eve1 = grabCollied1.GetColliedTime();
+                float eve2 = grabCollied2.GetColliedTime();
+                float eventDiff = Mathf.Abs(eve1 - eve2);
+                Debug.Log("Time difference " + eventDiff);
                 Debug.Log("[Server] Matching pair detected: triggering movement.");
-                MoveObjectForward();
+                //MoveObjectForward();
                 msgQueue.Clear();
+               // SyncroniCount++;
+                Debug.Log("Syncroni count "+SyncroniCount);
+                Debug.Log("Threshold Time "+eventDiff);
+                if(eventDiff<=threshold)
+                {
+                    MoveObjectForward();
+                    SyncroniCount++;
+                    Debug.Log("Syncroni count " + SyncroniCount + "With time diff" + eventDiff);
+                }
             }
             else
             {
@@ -68,4 +96,9 @@ public class SyncroniCalculator : NetworkBehaviour
             Debug.LogWarning("[Server] targetObject is null — cannot move.");
         }
     }
+
+    public int getSyncroni() {
+        return SyncroniCount;
+    }
+
 }
