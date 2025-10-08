@@ -7,27 +7,21 @@ namespace VRInSync.Network
 {
     public class NetworkMusicManager : NetworkBehaviour
     {
-        public AudioSource goAudioSource;      // Plays "321Go"
-        public AudioSource mainAudioSource;    // Plays "MainLoop"
-        public AudioSource cheerAudioSource;    // "Cheering"
+        public AudioSource audioSource;
+        public AudioSource audioSource2;
+        public AudioSource audioSource3;
+        public AudioSource audioSource4; // whistle only
+
         private double networkToDspOffset;
 
         private void Awake()
         {
-            if (goAudioSource == null || mainAudioSource == null)
-            {
-                var sources = GetComponentsInChildren<AudioSource>();
-                if (sources.Length >= 2)
-                {
-                    goAudioSource = sources[0];
-                    mainAudioSource = sources[1];
-                    cheerAudioSource = sources[2];
-                }
-                else
-                {
-                    Debug.LogError("Not enough AudioSources assigned or found in children.");
-                }
-            }
+            if (audioSource == null)
+                audioSource = GetComponentInChildren<AudioSource>();
+            if (audioSource2 == null)
+                Debug.LogWarning("audioSource2 is not assigned");
+            if (audioSource3 == null)
+                Debug.LogWarning("audioSource3 is not assigned");
         }
 
         private void Start()
@@ -50,7 +44,7 @@ namespace VRInSync.Network
             if (!IsServer) return;
 
             var nowUtc = NtpTime.GetNetworkTime();
-            var startUtc = nowUtc.AddSeconds(0.5);  // buffer for sync
+            var startUtc = nowUtc.AddSeconds(2);
             long ticks = startUtc.Ticks;
 
             StartMusicClientRpc(ticks);
@@ -68,41 +62,59 @@ namespace VRInSync.Network
             double delay = (startSec - networkToDspOffset) - dspNow;
             if (delay < 0) delay = 0;
 
-            // Scheduled DSP times
-            double dsp321GoTime = dspNow + delay;
-            double goClipLength = goAudioSource.clip.length;
-            double dspMainLoopTime = dsp321GoTime + goClipLength;
+            /*double scheduledDsp = dspNow + delay;
+            audioSource.PlayScheduled(scheduledDsp);
 
-            // Schedule all
-            goAudioSource.PlayScheduled(dsp321GoTime);
-            mainAudioSource.PlayScheduled(dspMainLoopTime);
-            cheerAudioSource.PlayScheduled(dspMainLoopTime);
+            Debug.Log($"[Everyone] playback scheduled at DSP time = {scheduledDsp:F3}");
+            */
+            double dspStartTime = dspNow + delay;
 
-            Debug.Log($"[Everyone] '321Go' at DSP={dsp321GoTime:F3}, 'MainLoop' and 'Cheer' at DSP={dspMainLoopTime:F3}");
+            // Play Audio 1
+            audioSource.loop = false;
+            audioSource.PlayScheduled(dspStartTime);
+
+            // Calculate playtime for audio 2 and 3
+            double audio1Length = audioSource.clip.length;
+            double dspTimeFor23 = dspStartTime + audio1Length;
+
+            // Play audio 2 and 3 simultaneously
+            audioSource2.loop = true;
+            audioSource3.loop = true;
+            audioSource4.loop = true;
+            audioSource2.PlayScheduled(dspTimeFor23);
+            audioSource3.PlayScheduled(dspTimeFor23);
+            audioSource4.PlayScheduled(dspTimeFor23);
+
+            Debug.Log($"[Everyone] Audio1 scheduled at DSP time = {dspStartTime:F3}");
+            Debug.Log($"[Everyone] Audio2/3 scheduled at DSP time = {dspTimeFor23:F3}");
+
         }
 
         [Rpc(SendTo.Everyone)]
         public void StopMusicClientRpc()
         {
-            goAudioSource.Stop();
-            mainAudioSource.Stop();
-            cheerAudioSource.Stop();
+            audioSource.Stop();
+            audioSource2.Stop();
+            audioSource3.Stop();
+            audioSource4.Stop();
         }
 
         [Rpc(SendTo.Everyone)]
         public void PauseMusicClientRpc()
         {
-            goAudioSource.Pause();
-            mainAudioSource.Pause();
-            cheerAudioSource.Pause();
+            audioSource.Pause();
+            audioSource2.Pause();
+            audioSource3.Pause();
+            audioSource4.Pause();
         }
 
         [Rpc(SendTo.Everyone)]
         public void ResumeMusicClientRpc()
         {
-             goAudioSource.UnPause();
-             mainAudioSource.UnPause();
-             cheerAudioSource.UnPause();
+            audioSource.UnPause();
+            audioSource2.UnPause();
+            audioSource3.UnPause();
+            audioSource4.UnPause();
         }
     }
 }
